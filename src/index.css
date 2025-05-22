@@ -45,7 +45,8 @@
 :root {
 	--radius: 0.625rem;
 	--background: oklch(1 0 0);
-	--foreground: oklch(0.145 0 0);
+	/* --foreground: oklch(0.145 0 0); */
+	--foreground: oklch(0.21 0.04 266);
 	--card: oklch(1 0 0);
 	--card-foreground: oklch(0.145 0 0);
 	--popover: oklch(1 0 0);
@@ -115,6 +116,7 @@
 	:root {
 		--shadow-custom: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
 			rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+		--text-color-global: oklch(0.13 0.04 265); /* slate 950 */
 	}
 	* {
 		@apply border-border outline-ring/50;

@@ -6,6 +6,7 @@ export type UserType = {
 	lastName: string;
 	fullName: string;
 	email: string;
+	role: string;
 	phoneNumber: string;
 	avatar: string;
 	addresses: UserAddressType[];
