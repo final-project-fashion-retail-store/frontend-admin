@@ -62,9 +62,24 @@ export const updateProfile = async (data: {
 	firstName?: string;
 	lastName?: string;
 	phoneNumber?: string;
+	avatar?: { url: string; public_id: string };
 }) => {
 	try {
 		const res = await instance.patch('users/edit-profile', data);
+
+		return res.data;
+	} catch (err) {
+		if (isAxiosError(err)) throw err;
+	}
+};
+
+export const changePassword = async (data: {
+	oldPassword: string;
+	newPassword: string;
+	passwordConfirm: string;
+}) => {
+	try {
+		const res = await instance.patch('auth/change-password', data);
 
 		return res.data;
 	} catch (err) {

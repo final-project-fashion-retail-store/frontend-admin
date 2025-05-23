@@ -8,7 +8,7 @@ export type UserType = {
 	email: string;
 	role: string;
 	phoneNumber: string;
-	avatar: string;
+	avatar: { url: string; public_id: string };
 	addresses: UserAddressType[];
 	passwordChangedAt: Date;
 };

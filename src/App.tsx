@@ -13,7 +13,7 @@ import ResetPassword from '@/pages/ResetPassword';
 import MainLayout from '@/layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import UserSettings from '@/pages/UserSettings';
-import Profile from '@/pages/Profile';
+import Profile from '@/pages/Profile/Profile';
 
 const App = () => {
 	const [checkAuth, isCheckingAuth, authUser] = useAuthStore(

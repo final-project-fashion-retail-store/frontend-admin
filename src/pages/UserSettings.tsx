@@ -1,7 +1,7 @@
 import { Separator } from '@/components/ui/separator';
 import { Cancel02Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 
 const menuItems = [
 	{
@@ -15,6 +15,7 @@ const menuItems = [
 ];
 
 const UserSettings = () => {
+	const location = useLocation();
 	return (
 		<div className='w-screen h-screen flex items-center justify-center'>
 			<div className='w-[90%] h-[90%] border rounded-2xl p-6 px-12'>
@@ -45,7 +46,9 @@ const UserSettings = () => {
 							<Link
 								key={index}
 								to={item.path}
-								className='font-semibold hover:underline p-2 bg-sidebar-accent rounded-md'
+								className={`font-semibold hover:underline p-2 rounded-md ${
+									location.pathname.includes(item.path) && 'bg-sidebar-accent'
+								}`}
 							>
 								{item.title}
 							</Link>

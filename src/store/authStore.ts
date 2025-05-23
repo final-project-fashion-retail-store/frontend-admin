@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import type { UserType } from '@/types';
 import { setRefreshTokenFunction } from '@/utils/axios';
 import {
+	changePassword,
 	forgotPassword,
 	getCurrentUser,
 	login,
@@ -26,6 +27,7 @@ type Store = {
 	isSendingEmail: boolean;
 	isResettingPassword: boolean;
 	isUpdatingProfile: boolean;
+	isChangingPassword: boolean;
 
 	checkAuth: () => void;
 	login: (data: LoginType) => Promise<void | string>;
@@ -40,6 +42,12 @@ type Store = {
 		firstName?: string;
 		lastName?: string;
 		phoneNumber?: string;
+		avatar?: { url: string; public_id: string };
+	}) => Promise<void | string>;
+	changePassword: (data: {
+		oldPassword: string;
+		newPassword: string;
+		passwordConfirm: string;
 	}) => Promise<void | string>;
 };
 
@@ -71,6 +79,7 @@ const useAuthStore = create<Store>((set) => ({
 	isSendingEmail: false,
 	isResettingPassword: false,
 	isUpdatingProfile: false,
+	isChangingPassword: false,
 
 	async checkAuth() {
 		try {
@@ -88,6 +97,7 @@ const useAuthStore = create<Store>((set) => ({
 			set({ isCheckingAuth: false });
 		}
 	},
+
 	async login(data) {
 		try {
 			set({ isLoggingIn: true });
@@ -109,6 +119,7 @@ const useAuthStore = create<Store>((set) => ({
 			set({ isLoggingIn: false });
 		}
 	},
+
 	async logout() {
 		try {
 			set({ isLoggingOut: true });
@@ -125,12 +136,14 @@ const useAuthStore = create<Store>((set) => ({
 			set({ isLoggingOut: false });
 		}
 	},
+
 	async refreshAccessToken() {
 		const res = await refreshToken();
 		if (!res) {
 			throw new Error('Failed to refresh token');
 		}
 	},
+
 	async forgotPassword(email) {
 		try {
 			set({ isSendingEmail: true });
@@ -166,12 +179,12 @@ const useAuthStore = create<Store>((set) => ({
 			set({ isResettingPassword: false });
 		}
 	},
+
 	async updateProfile(data) {
 		try {
 			set({ isUpdatingProfile: true });
 			const res = await updateProfile(data);
 			if (res) {
-				console.log(res);
 				toast.success('Profile updated successfully');
 				set({ authUser: res.data.user });
 			}
@@ -184,6 +197,25 @@ const useAuthStore = create<Store>((set) => ({
 			}
 		} finally {
 			set({ isUpdatingProfile: false });
+		}
+	},
+
+	async changePassword(data) {
+		try {
+			set({ isChangingPassword: true });
+			const res = await changePassword(data);
+			if (res) {
+				toast.success('Password changed successfully');
+			}
+		} catch (err) {
+			if (err instanceof AxiosError) {
+				toast.error('Failed to change password');
+				console.log(err);
+				console.log(err?.response?.data?.message);
+				return err?.response?.data?.message;
+			}
+		} finally {
+			set({ isChangingPassword: false });
 		}
 	},
 }));
