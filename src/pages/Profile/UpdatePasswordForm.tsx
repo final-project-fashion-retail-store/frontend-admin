@@ -48,12 +48,8 @@ const formSchema = z
 	});
 
 const UpdatePasswordForm = () => {
-	const [authUser, isChangingPassword, changePassword] = useAuthStore(
-		useShallow((state) => [
-			state.authUser,
-			state.isChangingPassword,
-			state.changePassword,
-		])
+	const [isChangingPassword, changePassword] = useAuthStore(
+		useShallow((state) => [state.isChangingPassword, state.changePassword])
 	);
 	const [showCurrentPassword, setShowCurrentPassword] = useState(false);
 	const [showNewPassword, setShowNewPassword] = useState(false);
@@ -120,8 +116,8 @@ const UpdatePasswordForm = () => {
 									<Input
 										{...field}
 										type={showCurrentPassword ? 'text' : 'password'}
-										autoComplete='current-password'
-										placeholder='Current Password'
+										autoComplete='old-password'
+										placeholder='Old Password'
 									/>
 									<div className='absolute right-2 top-1/2 transform -translate-y-1/2'>
 										{showCurrentPassword ? (

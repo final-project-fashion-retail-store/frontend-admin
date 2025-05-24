@@ -1,4 +1,10 @@
+import CustomSidebarTrigger from '@/components/CustomSidebarTrigger';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -13,11 +19,14 @@ import {
 	SidebarFooter,
 	SidebarGroup,
 	SidebarGroupContent,
-	SidebarGroupLabel,
-	// SidebarHeader,
+	// SidebarGroupLabel,
+	SidebarHeader,
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
+	SidebarMenuSub,
+	SidebarMenuSubButton,
+	SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
 import { useAuthStore } from '@/store';
 import {
@@ -29,7 +38,14 @@ import {
 	UnfoldMoreIcon,
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { LogOut, UserRoundCog } from 'lucide-react';
+import {
+	ChevronDown,
+	House,
+	LogOut,
+	UserCheck,
+	UserRoundCog,
+	Users,
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 
@@ -66,34 +82,78 @@ export function AppSidebar() {
 	const [authUser, isLoggingOut, logout] = useAuthStore(
 		useShallow((state) => [state.authUser, state.isLoggingOut, state.logout])
 	);
+
 	return (
 		<Sidebar
 			variant='floating'
 			collapsible='icon'
 		>
 			{isLoggingOut && <Overlay />}
-			{/* <SidebarHeader /> */}
+			<SidebarHeader>
+				<SidebarMenu>
+					<SidebarMenuItem>
+						<SidebarMenuButton
+							asChild
+							className='w-8'
+						>
+							<span>
+								<CustomSidebarTrigger />
+							</span>
+						</SidebarMenuButton>
+					</SidebarMenuItem>
+				</SidebarMenu>
+			</SidebarHeader>
 			<SidebarContent>
-				<SidebarGroup />
-				<SidebarGroupLabel>Application</SidebarGroupLabel>
-				<SidebarGroupContent>
-					<SidebarMenu>
-						{items.map((item) => (
-							<SidebarMenuItem key={item.title}>
+				{/* Dashboard */}
+				<SidebarGroup>
+					<SidebarGroupContent>
+						<SidebarMenu>
+							<SidebarMenuItem>
 								<SidebarMenuButton asChild>
-									<a
-										href={item.url}
-										className='mx-auto'
-									>
-										<HugeiconsIcon icon={item.icon} />
-										<span>{item.title}</span>
-									</a>
+									<Link to={'dashboard'}>
+										<House />
+										<span>Dashboard</span>
+									</Link>
 								</SidebarMenuButton>
 							</SidebarMenuItem>
-						))}
-					</SidebarMenu>
-				</SidebarGroupContent>
-				{/* <SidebarGroup /> */}
+							<SidebarMenuItem>
+								{/* User management */}
+								<Collapsible
+									defaultOpen
+									className='group/collapsible'
+								>
+									<CollapsibleTrigger asChild>
+										<SidebarMenuButton>
+											<Users />
+											<span>User Management</span>
+											<ChevronDown className='ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180' />
+										</SidebarMenuButton>
+									</CollapsibleTrigger>
+									<CollapsibleContent>
+										<SidebarMenuSub>
+											<SidebarMenuSubItem>
+												<SidebarMenuSubButton asChild>
+													<Link to={'manage-customers'}>
+														<Users />
+														<span>Customers</span>
+													</Link>
+												</SidebarMenuSubButton>
+											</SidebarMenuSubItem>
+											<SidebarMenuSubItem>
+												<SidebarMenuSubButton asChild>
+													<Link to={'manage-employees'}>
+														<UserCheck />
+														<span>Staff</span>
+													</Link>
+												</SidebarMenuSubButton>
+											</SidebarMenuSubItem>
+										</SidebarMenuSub>
+									</CollapsibleContent>
+								</Collapsible>
+							</SidebarMenuItem>
+						</SidebarMenu>
+					</SidebarGroupContent>
+				</SidebarGroup>
 			</SidebarContent>
 			<SidebarFooter>
 				<SidebarMenu>
@@ -106,7 +166,7 @@ export function AppSidebar() {
 								>
 									<Avatar className='size-8'>
 										<AvatarImage
-											src={authUser?.avatar}
+											src={authUser?.avatar?.url}
 											alt='User avatar'
 										/>
 										<AvatarFallback>PB</AvatarFallback>
@@ -131,7 +191,7 @@ export function AppSidebar() {
 								<div className='flex items-center gap-2 p-2'>
 									<Avatar className='h-8 w-8'>
 										<AvatarImage
-											src={authUser?.avatar}
+											src={authUser?.avatar?.url}
 											alt='User avatar'
 										/>
 										<AvatarFallback>PB</AvatarFallback>

@@ -9,8 +9,8 @@ const MainLayout = () => {
 	return (
 		<SidebarProvider defaultOpen={defaultOpen}>
 			<AppSidebar />
+			<SidebarTrigger />
 			<main>
-				<SidebarTrigger />
 				<Outlet />
 			</main>
 		</SidebarProvider>

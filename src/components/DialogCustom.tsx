@@ -28,7 +28,7 @@ const DialogCustom = ({
 	return (
 		<Dialog>
 			<DialogTrigger asChild>{children}</DialogTrigger>
-			<DialogContent className='sm:max-w-[425px]'>
+			<DialogContent className='sm:max-w-[425px] font-display'>
 				<DialogHeader>
 					<DialogTitle>{title}</DialogTitle>
 					<DialogDescription>{description}</DialogDescription>

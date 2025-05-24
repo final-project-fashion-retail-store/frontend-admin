@@ -63,7 +63,7 @@ const UserAvatar = () => {
 
 	return (
 		<label htmlFor='avatar'>
-			<div className='size-18 cursor-pointer relative group'>
+			<div className='size-18 max-md:size-14 cursor-pointer relative group'>
 				<Avatar
 					className={`size-full ring ring-foreground ${
 						(isUpdatingProfile || isUploadingImages || isDestroyingImages) &&
@@ -78,7 +78,7 @@ const UserAvatar = () => {
 					<AvatarFallback>FB</AvatarFallback>
 				</Avatar>
 				{/* camera icon */}
-				<span className='flex items-center justify-center bg-secondary ring-1 ring-foreground/50 rounded-full size-8 absolute -bottom-2 right-0 transition-opacity ease-linear duration-150 opacity-0 group-hover:opacity-100'>
+				<span className='flex items-center justify-center bg-secondary ring-1 ring-foreground/50 rounded-full size-8 max-md:size-6 absolute -bottom-2 right-0 transition-opacity ease-linear duration-150 2xl:opacity-0 opacity-100 group-hover:opacity-100'>
 					<HugeiconsIcon
 						icon={Camera02Icon}
 						size={20}

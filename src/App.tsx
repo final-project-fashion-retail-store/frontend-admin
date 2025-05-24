@@ -14,6 +14,10 @@ import MainLayout from '@/layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import UserSettings from '@/pages/UserSettings';
 import Profile from '@/pages/Profile/Profile';
+import Appearance from '@/pages/Appearance/Appearance';
+import { ThemeProvider } from '@/components/ThemeProvider';
+import CustomerManagement from '@/pages/CustomerManagement';
+import StaffManagement from '@/pages/StaffManagement';
 
 const App = () => {
 	const [checkAuth, isCheckingAuth, authUser] = useAuthStore(
@@ -36,70 +40,80 @@ const App = () => {
 	}
 
 	return (
-		<div className='font-display'>
-			<Routes>
-				<Route
-					path='/'
-					element={
-						authUser ? (
-							<ProtectedRoute allowedRoles={['admin', 'staff']}>
-								<MainLayout />
-							</ProtectedRoute>
-						) : (
-							<Navigate to={'/login'} />
-						)
-					}
-				>
+		<ThemeProvider>
+			<div className='font-display'>
+				<Routes>
 					<Route
-						index
-						element={<Navigate to='dashboard' />}
+						path='/'
+						element={
+							authUser ? (
+								<ProtectedRoute allowedRoles={['admin', 'staff']}>
+									<MainLayout />
+								</ProtectedRoute>
+							) : (
+								<Navigate to={'/login'} />
+							)
+						}
+					>
+						<Route
+							index
+							element={<Navigate to='dashboard' />}
+						/>
+						<Route
+							path='dashboard'
+							element={<Dashboard />}
+						/>
+						<Route
+							path='manage-customers'
+							element={<CustomerManagement />}
+						/>
+						<Route
+							path='manage-employees'
+							element={<StaffManagement />}
+						/>
+						<Route />
+					</Route>
+					<Route
+						path='/login'
+						element={authUser ? <Navigate to={'/'} /> : <Login />}
 					/>
 					<Route
-						path='dashboard'
-						element={<Dashboard />}
-					/>
-					<Route />
-				</Route>
-				<Route
-					path='/login'
-					element={authUser ? <Navigate to={'/'} /> : <Login />}
-				/>
-				<Route
-					path='/forgot-password'
-					element={authUser ? <Navigate to={'/'} /> : <ForgotPassword />}
-				/>
-				<Route
-					path='/reset-password/:resetPasswordToken'
-					element={authUser ? <Navigate to={'/'} /> : <ResetPassword />}
-				/>
-				<Route
-					path='/setting'
-					element={
-						authUser ? (
-							<ProtectedRoute allowedRoles={['admin', 'staff']}>
-								<UserSettings />
-							</ProtectedRoute>
-						) : (
-							<Navigate to={'/login'} />
-						)
-					}
-				>
-					<Route
-						index
-						element={<Navigate to={'profile'} />}
+						path='/forgot-password'
+						element={authUser ? <Navigate to={'/'} /> : <ForgotPassword />}
 					/>
 					<Route
-						path='profile'
-						element={<Profile />}
+						path='/reset-password/:resetPasswordToken'
+						element={authUser ? <Navigate to={'/'} /> : <ResetPassword />}
 					/>
 					<Route
-						path='appearance'
-						element={<div>Appearance</div>}
-					/>
-				</Route>
-			</Routes>
-			<Toaster />
-		</div>
+						path='/setting'
+						element={
+							authUser ? (
+								<ProtectedRoute allowedRoles={['admin', 'staff']}>
+									<UserSettings />
+								</ProtectedRoute>
+							) : (
+								<Navigate to={'/login'} />
+							)
+						}
+					>
+						<Route
+							index
+							element={<Navigate to={'profile'} />}
+						/>
+						<Route
+							path='profile'
+							element={<Profile />}
+						/>
+						<Route
+							path='appearance'
+							element={<Appearance />}
+						/>
+					</Route>
+				</Routes>
+				<Toaster />
+			</div>
+		</ThemeProvider>
 	);
 };
 
