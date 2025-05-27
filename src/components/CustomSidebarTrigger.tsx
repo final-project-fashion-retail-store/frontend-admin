@@ -5,6 +5,7 @@ import { useState } from 'react';
 const CustomSidebarTrigger = () => {
 	const { toggleSidebar, open } = useSidebar();
 	const [isHovering, setIsHovering] = useState(false);
+
 	return (
 		<button
 			onClick={() => {

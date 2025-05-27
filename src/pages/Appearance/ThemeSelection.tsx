@@ -1,6 +1,6 @@
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { useThemeStore } from '@/store/themeStore';
+import { useThemeStore } from '@/store';
 import { useShallow } from 'zustand/react/shallow';
 
 const themeOptions: { value: string; label: string }[] = [

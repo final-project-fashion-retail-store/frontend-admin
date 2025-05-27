@@ -9,6 +9,8 @@ export type UserType = {
 	role: string;
 	phoneNumber: string;
 	avatar: { url: string; public_id: string };
-	addresses: UserAddressType[];
+	userAddresses: UserAddressType[];
 	passwordChangedAt: Date;
+	active: boolean;
+	createdAt: Date;
 };

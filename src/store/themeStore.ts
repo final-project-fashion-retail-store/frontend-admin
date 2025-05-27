@@ -21,7 +21,7 @@ const getActualTheme = (theme: Theme): 'light' | 'dark' => {
 	return theme === 'system' ? getSystemTheme() : theme;
 };
 
-export const useThemeStore = create<ThemeStore>()(
+const useThemeStore = create<ThemeStore>()(
 	persist(
 		(set, get) => ({
 			theme: 'system',
@@ -63,3 +63,5 @@ export const useThemeStore = create<ThemeStore>()(
 		}
 	)
 );
+
+export default useThemeStore;

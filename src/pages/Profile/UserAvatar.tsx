@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuthStore } from '@/store';
 import { useShallow } from 'zustand/react/shallow';
 import { toast } from 'sonner';
-import useGeneralStore from '@/store/generalStore';
+import { useGeneralStore } from '@/store';
 import { AxiosError } from 'axios';
 
 const UserAvatar = () => {

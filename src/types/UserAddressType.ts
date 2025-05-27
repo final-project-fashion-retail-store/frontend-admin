@@ -4,6 +4,7 @@ export type UserAddressType = {
 	fullName: string;
 	phoneNumber: string;
 	addressLine: string;
+	formattedAddress: string;
 	city: string;
 	district: string;
 	ward: string;

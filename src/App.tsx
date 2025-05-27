@@ -16,7 +16,7 @@ import UserSettings from '@/pages/UserSettings';
 import Profile from '@/pages/Profile/Profile';
 import Appearance from '@/pages/Appearance/Appearance';
 import { ThemeProvider } from '@/components/ThemeProvider';
-import CustomerManagement from '@/pages/CustomerManagement';
+import CustomerManagement from '@/pages/CustomerManagement/CustomerManagement';
 import StaffManagement from '@/pages/StaffManagement';
 
 const App = () => {

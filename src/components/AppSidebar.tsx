@@ -89,7 +89,7 @@ export function AppSidebar() {
 			collapsible='icon'
 		>
 			{isLoggingOut && <Overlay />}
-			<SidebarHeader>
+			<SidebarHeader className='hidden lg:flex'>
 				<SidebarMenu>
 					<SidebarMenuItem>
 						<SidebarMenuButton
