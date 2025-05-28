@@ -1,5 +1,5 @@
 import type { UserType } from '@/types';
-import { Fragment } from 'react';
+import { Fragment, use } from 'react';
 
 import {
 	DropdownMenu,
@@ -13,6 +13,10 @@ import { MapPin, MoreHorizontal } from 'lucide-react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useShallow } from 'zustand/react/shallow';
+import { useManagementStore } from '@/store';
+import AlertDialogCustom from '@/components/AlertDialogCustom';
+import UserContext from '@/pages/components/User/Context/UserContext';
 
 type Props = {
 	index: number;
@@ -20,6 +24,22 @@ type Props = {
 };
 
 const TableRowCustom = ({ index, data }: Props) => {
+	const [updateUser, deleteUser, getAllUser] = useManagementStore(
+		useShallow((state) => [state.updateUser, state.deleteUser, state.getAllUsers])
+	);
+
+	const { role, searchValue, active, sort, paginationLink } = use(UserContext);
+
+	const handleClickAction = (action: string) => {
+		if (action === 'activate' || action === 'deactivate') {
+			updateUser(data?._id, { active: action === 'activate' ? true : false });
+			getAllUser(role, searchValue, active, sort, paginationLink);
+		} else if (action === 'delete') {
+			deleteUser(data?._id);
+			getAllUser(role, searchValue, active, sort, paginationLink);
+		}
+	};
+
 	return (
 		<Fragment>
 			<TableRow>
@@ -78,10 +98,30 @@ const TableRowCustom = ({ index, data }: Props) => {
 							<DropdownMenuLabel>Action</DropdownMenuLabel>
 							<DropdownMenuSeparator />
 							<DropdownMenuItem>Edit</DropdownMenuItem>
-							<DropdownMenuItem>
-								{data?.active ? 'Deactivate' : 'Activate  '}
-							</DropdownMenuItem>
-							<DropdownMenuItem>Delete</DropdownMenuItem>
+							<AlertDialogCustom
+								title={`Are you sure you want to ${
+									data?.active ? 'deactivate' : 'activate'
+								} this user?`}
+								description=''
+								handler={[
+									() => handleClickAction(data?.active ? 'deactivate' : 'activate'),
+								]}
+								asChild
+							>
+								<DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+									{data?.active ? 'Deactivate' : 'Activate  '}
+								</DropdownMenuItem>
+							</AlertDialogCustom>
+							<AlertDialogCustom
+								title='Are you sure you want to delete this user?'
+								description='This action cannot be undone. This will permanently delete the account and remove the data from the servers.'
+								handler={[() => handleClickAction('delete')]}
+								asChild
+							>
+								<DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+									Delete
+								</DropdownMenuItem>
+							</AlertDialogCustom>
 						</DropdownMenuContent>
 					</DropdownMenu>
 				</TableCell>

@@ -1,10 +1,10 @@
-import { Button } from '@/components/ui/button';
+// import { Button } from '@/components/ui/button';
 import {
 	Dialog,
-	DialogClose,
+	// DialogClose,
 	DialogContent,
 	DialogDescription,
-	DialogFooter,
+	// DialogFooter,
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
@@ -15,7 +15,7 @@ type Props = {
 	title?: string;
 	description?: string;
 	form?: React.ReactNode;
-	handleConfirm?: () => void;
+	className?: string;
 };
 
 const DialogCustom = ({
@@ -23,17 +23,19 @@ const DialogCustom = ({
 	title,
 	description,
 	form,
-	handleConfirm,
+	className,
 }: Props) => {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>{children}</DialogTrigger>
-			<DialogContent className='sm:max-w-[425px] font-display'>
+			<DialogContent
+				className={`sm:max-w-[425px] max-h-[80vh] flex flex-col font-display ${className}`}
+			>
 				<DialogHeader>
 					<DialogTitle>{title}</DialogTitle>
 					<DialogDescription>{description}</DialogDescription>
 				</DialogHeader>
-				{form}
+				<div className='flex-1 overflow-y-auto pr-2'>{form}</div>
 				{/* <DialogFooter>
 					<Button type='submit'>Save changes</Button>
 				</DialogFooter> */}
