@@ -25,7 +25,7 @@ type Store = {
 		sort?: string | '',
 		paginationLink?: string
 	) => void;
-	createUser: (data: UserSendType) => void;
+	createUser: (data: UserSendType) => Promise<void | string>;
 	updateUser: (id: string, data: UserSendType) => void;
 	deleteUser: (id: string) => void;
 };
@@ -40,16 +40,17 @@ const useManagementStore = create<Store>((set) => ({
 	isDeletingUser: false,
 
 	async createUser(data) {
-		set({ isCreatingUser: true });
 		try {
+			set({ isCreatingUser: true });
 			const res = await createUser(data);
-			console.log(res);
+			console.log(res.data);
 			toast.success('User created successfully');
 		} catch (err) {
 			if (err instanceof AxiosError) {
+				toast.error('Failed to create user');
 				console.log(err);
 				console.log(err?.response?.data?.message);
-				toast.error('Failed to create user');
+				return err?.response?.data?.message;
 			}
 		} finally {
 			set({ isCreatingUser: false });

@@ -56,6 +56,7 @@ const UpdatePasswordForm = () => {
 	const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
 
 	const closeRef = useRef<HTMLButtonElement>(null);
+	const submitBtnRef = useRef<HTMLButtonElement>(null);
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -82,137 +83,155 @@ const UpdatePasswordForm = () => {
 	}
 
 	return (
-		<Form {...form}>
-			{isChangingPassword && <Overlay />}
-			<form
-				onSubmit={form.handleSubmit(onSubmit)}
-				className='space-y-4'
-			>
-				<FormField
-					control={form.control}
-					name='username'
-					render={({ field }) => (
-						<FormItem className='hidden'>
-							<FormLabel>Username</FormLabel>
-							<FormControl>
-								<Input
-									{...field}
-									type='text'
-									autoComplete='username'
-									readOnly
-								/>
-							</FormControl>
-						</FormItem>
-					)}
+		<>
+			<div className='flex-1 overflow-y-auto overflow-x-hidden px-2'>
+				<Form {...form}>
+					{isChangingPassword && <Overlay />}
+					<form
+						onSubmit={form.handleSubmit(onSubmit)}
+						className='space-y-4'
+					>
+						<FormField
+							control={form.control}
+							name='username'
+							render={({ field }) => (
+								<FormItem className='hidden'>
+									<FormLabel>Username</FormLabel>
+									<FormControl>
+										<Input
+											{...field}
+											type='text'
+											autoComplete='username'
+											readOnly
+										/>
+									</FormControl>
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name='oldPassword'
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Old Password</FormLabel>
+									<FormControl>
+										<div className='h-10 relative'>
+											<Input
+												{...field}
+												type={showCurrentPassword ? 'text' : 'password'}
+												autoComplete='old-password'
+												placeholder='Old Password'
+											/>
+											<div className='absolute right-2 top-1/2 transform -translate-y-1/2'>
+												{showCurrentPassword ? (
+													<Eye
+														className='cursor-pointer size-5'
+														onClick={() => setShowCurrentPassword(false)}
+													/>
+												) : (
+													<EyeOff
+														className='cursor-pointer size-5'
+														onClick={() => setShowCurrentPassword(true)}
+													/>
+												)}
+											</div>
+										</div>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name='newPassword'
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>New Password</FormLabel>
+									<FormControl>
+										<div className='h-10 relative'>
+											<Input
+												{...field}
+												type={showNewPassword ? 'text' : 'password'}
+												autoComplete='new-password'
+												placeholder='New Password'
+											/>
+											<div className='absolute right-2 top-1/2 transform -translate-y-1/2'>
+												{showNewPassword ? (
+													<Eye
+														className='cursor-pointer size-5'
+														onClick={() => setShowNewPassword(false)}
+													/>
+												) : (
+													<EyeOff
+														className='cursor-pointer size-5'
+														onClick={() => setShowNewPassword(true)}
+													/>
+												)}
+											</div>
+										</div>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name='passwordConfirm'
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Confirm Password</FormLabel>
+									<FormControl>
+										<div className='h-10 relative'>
+											<Input
+												{...field}
+												type={showPasswordConfirm ? 'text' : 'password'}
+												autoComplete='new-password'
+												placeholder='Confirm Password'
+											/>
+											<div className='absolute right-2 top-1/2 transform -translate-y-1/2'>
+												{showPasswordConfirm ? (
+													<Eye
+														className='cursor-pointer size-5'
+														onClick={() => setShowPasswordConfirm(false)}
+													/>
+												) : (
+													<EyeOff
+														className='cursor-pointer size-5'
+														onClick={() => setShowPasswordConfirm(true)}
+													/>
+												)}
+											</div>
+										</div>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<button
+							ref={submitBtnRef}
+							type='submit'
+							hidden
+						/>
+					</form>
+				</Form>
+			</div>
+			<DialogFooter>
+				<DialogClose
+					ref={closeRef}
+					className='hidden'
 				/>
-				<FormField
-					control={form.control}
-					name='oldPassword'
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Old Password</FormLabel>
-							<FormControl>
-								<div className='h-10 relative'>
-									<Input
-										{...field}
-										type={showCurrentPassword ? 'text' : 'password'}
-										autoComplete='old-password'
-										placeholder='Old Password'
-									/>
-									<div className='absolute right-2 top-1/2 transform -translate-y-1/2'>
-										{showCurrentPassword ? (
-											<Eye
-												className='cursor-pointer size-5'
-												onClick={() => setShowCurrentPassword(false)}
-											/>
-										) : (
-											<EyeOff
-												className='cursor-pointer size-5'
-												onClick={() => setShowCurrentPassword(true)}
-											/>
-										)}
-									</div>
-								</div>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={form.control}
-					name='newPassword'
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>New Password</FormLabel>
-							<FormControl>
-								<div className='h-10 relative'>
-									<Input
-										{...field}
-										type={showNewPassword ? 'text' : 'password'}
-										autoComplete='new-password'
-										placeholder='New Password'
-									/>
-									<div className='absolute right-2 top-1/2 transform -translate-y-1/2'>
-										{showNewPassword ? (
-											<Eye
-												className='cursor-pointer size-5'
-												onClick={() => setShowNewPassword(false)}
-											/>
-										) : (
-											<EyeOff
-												className='cursor-pointer size-5'
-												onClick={() => setShowNewPassword(true)}
-											/>
-										)}
-									</div>
-								</div>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={form.control}
-					name='passwordConfirm'
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Confirm Password</FormLabel>
-							<FormControl>
-								<div className='h-10 relative'>
-									<Input
-										{...field}
-										type={showPasswordConfirm ? 'text' : 'password'}
-										autoComplete='new-password'
-										placeholder='Confirm Password'
-									/>
-									<div className='absolute right-2 top-1/2 transform -translate-y-1/2'>
-										{showPasswordConfirm ? (
-											<Eye
-												className='cursor-pointer size-5'
-												onClick={() => setShowPasswordConfirm(false)}
-											/>
-										) : (
-											<EyeOff
-												className='cursor-pointer size-5'
-												onClick={() => setShowPasswordConfirm(true)}
-											/>
-										)}
-									</div>
-								</div>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-				<DialogFooter>
-					<DialogClose
-						ref={closeRef}
-						className='hidden'
-					/>
-					<Button type='submit'>Update Password</Button>
-				</DialogFooter>
-			</form>
-		</Form>
+				<Button
+					type='submit'
+					onClick={() => {
+						if (submitBtnRef.current) {
+							submitBtnRef.current.click();
+						}
+					}}
+				>
+					Update Password
+				</Button>
+			</DialogFooter>
+		</>
 	);
 };
 

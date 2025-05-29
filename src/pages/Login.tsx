@@ -50,6 +50,7 @@ const Login = () => {
 		if (error) {
 			form.setError('email', {
 				type: 'custom',
+				message: error,
 			});
 			form.setError('password', {
 				type: 'custom',

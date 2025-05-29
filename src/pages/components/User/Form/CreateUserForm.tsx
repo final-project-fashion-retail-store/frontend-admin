@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
@@ -14,13 +14,28 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Upload, User } from 'lucide-react';
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@/components/ui/select';
+import { useGeneralStore, useManagementStore } from '@/store';
+import { useShallow } from 'zustand/react/shallow';
+import SelectFormCustom from '@/components/SelectFormCustom';
+import { DialogClose, DialogFooter } from '@/components/ui/dialog';
+import { toast } from 'sonner';
+import Overlay from '@/components/ui/overlay';
+import { AxiosError } from 'axios';
+
+const addressLabelItems = [
+	{
+		id: 'Home',
+		name: 'Home',
+	},
+	{
+		id: 'Work',
+		name: 'Work',
+	},
+	{
+		id: 'Other',
+		name: 'Other',
+	},
+];
 
 const formSchema = z.object({
 	firstName: z.string().min(1, {
@@ -34,14 +49,62 @@ const formSchema = z.object({
 	}),
 	phoneNumber: z.string().optional(), // Optional - not all users may have phone
 	addressLine: z.string().optional(), // Optional - address may not be required
-	city: z.string().optional(),
-	district: z.string().optional(),
-	ward: z.string().optional(),
+	city: z
+		.object({
+			id: z.string(),
+			name: z.string(),
+		})
+		.optional(),
+	district: z
+		.object({
+			id: z.string(),
+			name: z.string(),
+		})
+		.optional(),
+	ward: z
+		.object({
+			id: z.string(),
+			name: z.string(),
+		})
+		.optional(),
 	label: z.string().optional(),
 });
 
-const CreateUserForm = () => {
-	const [imageUploaded, setImageUploaded] = useState<string>('');
+type Props = {
+	getImageAvatarId?: (public_url: string) => void;
+};
+const CreateUserForm = ({ getImageAvatarId }: Props) => {
+	const [isCreatingUser, createUser] = useManagementStore(
+		useShallow((state) => [state.isCreatingUser, state.createUser])
+	);
+	const [
+		provinces,
+		districts,
+		wards,
+		getProvinces,
+		getDistricts,
+		getWards,
+		isUploadingImages,
+		uploadImages,
+	] = useGeneralStore(
+		useShallow((state) => [
+			state.provinces,
+			state.districts,
+			state.wards,
+			state.getProvinces,
+			state.getDistricts,
+			state.getWards,
+			state.isUploadingImages,
+			state.uploadImages,
+		])
+	);
+	const [imageUploaded, setImageUploaded] = useState<{
+		secure_url: string;
+		public_id: string;
+	}>({ secure_url: '', public_id: '' });
+
+	const submitBtnRef = useRef<HTMLButtonElement>(null);
+
 	// 1. Define your form.
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -51,144 +114,158 @@ const CreateUserForm = () => {
 			email: '',
 			phoneNumber: '',
 			addressLine: '',
-			city: '',
-			district: '',
-			ward: '',
+			city: { id: '', name: '' },
+			district: { id: '', name: '' },
+			ward: { id: '', name: '' },
 			label: '',
 		},
 	});
 
-	// 2. Define a submit handler.
-	function onSubmit(values: z.infer<typeof formSchema>) {
-		// Do something with the form values.
-		// ✅ This will be type-safe and validated.
-		console.log(values);
-	}
-	return (
-		<Form {...form}>
-			<form
-				onSubmit={form.handleSubmit(onSubmit)}
-				className='space-y-4 p-1'
-			>
-				{/* upload avatar */}
-				<div className='w-full flex flex-col items-center space-y-4'>
-					{imageUploaded ? (
-						<div className='size-6 max-size-6'>
-							<img
-								src={imageUploaded}
-								alt='avatar-preview'
-							/>
-						</div>
-					) : (
-						<div className='size-20 max-size-20 ring-4 ring-foreground/20 bg-accent rounded-full flex items-center justify-center'>
-							<User className='size-12 text-foreground/30' />
-						</div>
-					)}
-					<div className='flex flex-col items-center space-y-1'>
-						<label htmlFor='upload-avatar'>
-							<input
-								id='upload-avatar'
-								type='file'
-								accept='image/*'
-								hidden
-							/>
-							<Button
-								className='cursor-pointer'
-								variant={'outline'}
-								asChild
-							>
-								<span>
-									<Upload /> Upload Avatar
-								</span>
-							</Button>
-						</label>
+	const { control, setValue } = form;
 
-						<span className='text-xs text-muted-foreground'>Optional • Max 5MB</span>
-					</div>
-				</div>
-				<FormField
-					control={form.control}
-					name='firstName'
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>
-								First Name <span className='text-destructive'>*</span>
-							</FormLabel>
-							<FormControl>
-								<Input
-									placeholder='Enter first name'
-									{...field}
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={form.control}
-					name='lastName'
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>
-								Last Name <span className='text-destructive'>*</span>
-							</FormLabel>
-							<FormControl>
-								<Input
-									placeholder='Enter last name'
-									{...field}
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={form.control}
-					name='email'
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>
-								Email <span className='text-destructive'>*</span>
-							</FormLabel>
-							<FormControl>
-								<Input
-									placeholder='Enter email'
-									{...field}
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={form.control}
-					name='phoneNumber'
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Phone Number</FormLabel>
-							<FormControl>
-								<Input
-									placeholder='Enter phone number'
-									{...field}
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-				{/* Address */}
-				<div className='w-full'>
-					<h3 className='font-semibold text-base py-2'>Address Information</h3>
-					<div className='space-y-4'>
+	const selectedCity = useWatch({ control, name: 'city' });
+	const selectedDistrict = useWatch({ control, name: 'district' });
+	const selectedWard = useWatch({ control, name: 'ward' });
+
+	useEffect(() => {
+		getProvinces();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
+
+	useEffect(() => {
+		if (selectedCity?.id) {
+			setValue('district', undefined);
+			setValue('ward', undefined);
+			getDistricts(selectedCity.id);
+		}
+	}, [selectedCity?.id, getDistricts, setValue]);
+
+	useEffect(() => {
+		if (selectedDistrict?.id) {
+			setValue('ward', undefined);
+			getWards(selectedDistrict.id);
+		}
+	}, [selectedDistrict?.id, getWards, setValue]);
+
+	// 2. Define a submit handler.
+	async function onSubmit(values: z.infer<typeof formSchema>) {
+		if (isCreatingUser || isUploadingImages) return;
+		const adequateValues = {
+			...values,
+			role: 'user' as 'user' | 'staff',
+			avatar: {
+				url: imageUploaded.secure_url,
+				public_id: imageUploaded.public_id,
+			},
+		};
+		// If the error is undefined, it means the login was successful
+		const errorMessage = await createUser(adequateValues);
+		if (errorMessage) {
+			form.setError('email', {
+				type: 'custom',
+				message: errorMessage,
+			});
+		}
+	}
+
+	const handleUploadAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target?.files?.[0];
+
+		if (!file) return;
+		if (!file.type.startsWith('image/')) {
+			toast.error('Please select an image file');
+			return;
+		}
+		if (file.size > 50 * 1024 * 1024) {
+			toast.error('File size exceeds 5MB');
+			return;
+		}
+
+		const formData = new FormData();
+		formData.append('images', file);
+
+		try {
+			// Then upload new image
+			const res = await uploadImages(formData);
+			if (res && !Array.isArray(res)) {
+				setImageUploaded(res);
+				if (getImageAvatarId) {
+					getImageAvatarId(res.public_id || '');
+				}
+			}
+		} catch (err) {
+			if (err instanceof AxiosError) {
+				toast.error('Failed to upload avatar');
+				console.log(err);
+				console.log(err?.response?.data?.message);
+			}
+		}
+	};
+
+	return (
+		<>
+			{(isUploadingImages || isCreatingUser) && <Overlay />}
+			<div className='flex-1 overflow-y-auto overflow-x-hidden px-2'>
+				<Form {...form}>
+					<form
+						onSubmit={form.handleSubmit(onSubmit)}
+						className='space-y-4 p-1'
+					>
+						{/* upload avatar */}
+						<div className='w-full flex flex-col items-center space-y-4'>
+							{imageUploaded.public_id ? (
+								<div className='size-20 max-size-20 rounded-full'>
+									<img
+										className='object-cover size-full rounded-full'
+										src={imageUploaded?.secure_url}
+										alt='avatar-preview'
+									/>
+								</div>
+							) : (
+								<div
+									className={`size-20 max-size-20 ring-4 ring-foreground/20 bg-accent rounded-full flex items-center justify-center ${
+										isUploadingImages && 'animate-pulse'
+									}`}
+								>
+									<User className='size-12 text-foreground/30' />
+								</div>
+							)}
+							<div className='flex flex-col items-center space-y-1'>
+								<label htmlFor='upload-avatar'>
+									<input
+										id='upload-avatar'
+										type='file'
+										accept='image/*'
+										hidden
+										onChange={(e) => handleUploadAvatar(e)}
+									/>
+									<Button
+										className='cursor-pointer'
+										variant={'outline'}
+										asChild
+									>
+										<span>
+											<Upload /> Upload Avatar
+										</span>
+									</Button>
+								</label>
+
+								<span className='text-xs text-muted-foreground'>
+									Optional • Max 5MB
+								</span>
+							</div>
+						</div>
 						<FormField
 							control={form.control}
-							name='addressLine'
+							name='firstName'
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Address Line</FormLabel>
+									<FormLabel>
+										First Name <span className='text-destructive'>*</span>
+									</FormLabel>
 									<FormControl>
 										<Input
-											placeholder='Enter street address'
+											placeholder='Enter first name'
 											{...field}
 										/>
 									</FormControl>
@@ -196,117 +273,166 @@ const CreateUserForm = () => {
 								</FormItem>
 							)}
 						/>
-						<div className='w-full flex flex-1 gap-4'>
-							<FormField
-								control={form.control}
-								name='city'
-								render={({ field }) => (
-									<FormItem className='flex-1'>
-										<FormLabel>Province/City</FormLabel>
-										<Select
-											onValueChange={field.onChange}
-											defaultValue={field.value}
-										>
+						<FormField
+							control={form.control}
+							name='lastName'
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>
+										Last Name <span className='text-destructive'>*</span>
+									</FormLabel>
+									<FormControl>
+										<Input
+											placeholder='Enter last name'
+											{...field}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name='email'
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>
+										Email <span className='text-destructive'>*</span>
+									</FormLabel>
+									<FormControl>
+										<Input
+											placeholder='Enter email'
+											{...field}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name='phoneNumber'
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Phone Number</FormLabel>
+									<FormControl>
+										<Input
+											placeholder='Enter phone number'
+											{...field}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						{/* Address */}
+						<div className='w-full'>
+							<h3 className='font-semibold text-base py-2'>Address Information</h3>
+							<div className='space-y-4'>
+								<FormField
+									control={form.control}
+									name='addressLine'
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Address Line</FormLabel>
 											<FormControl>
-												<SelectTrigger className='w-full'>
-													<SelectValue placeholder='Select province/city' />
-												</SelectTrigger>
+												<Input
+													placeholder='Enter street address'
+													{...field}
+												/>
 											</FormControl>
-											<SelectContent>
-												<SelectItem value='Vinh Long'>Vinh Long</SelectItem>
-												<SelectItem value='Can Tho'>Can Tho</SelectItem>
-												<SelectItem value='Ho Chi Minh'>Ho Chi Minh</SelectItem>
-											</SelectContent>
-										</Select>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name='district'
-								render={({ field }) => (
-									<FormItem className='flex-1'>
-										<FormLabel>District</FormLabel>
-										<Select
-											onValueChange={field.onChange}
-											defaultValue={field.value}
-										>
-											<FormControl>
-												<SelectTrigger className='w-full'>
-													<SelectValue placeholder='Select district' />
-												</SelectTrigger>
-											</FormControl>
-											<SelectContent>
-												<SelectItem value='Vinh Long'>Vinh Long</SelectItem>
-												<SelectItem value='Can Tho'>Can Tho</SelectItem>
-												<SelectItem value='Ho Chi Minh'>Ho Chi Minh</SelectItem>
-											</SelectContent>
-										</Select>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<div className='w-full flex flex-1 gap-4'>
+									<div className='w-full flex flex-1 gap-4'>
+										<SelectFormCustom
+											className='w-full'
+											control={control}
+											name='city'
+											label='Province/City'
+											placeholder='Select Province/City'
+											items={provinces?.map((p) => ({ id: p.id, name: p.name })) || []}
+											forForm={'create user'}
+										/>
+										<SelectFormCustom
+											className='w-full'
+											control={control}
+											name='district'
+											label='District'
+											placeholder='Select District'
+											items={districts?.map((d) => ({ id: d.id, name: d.name })) || []}
+											disabled={
+												!selectedCity?.id || (districts ? districts.length === 0 : false)
+											}
+											forForm={'create user'}
+										/>
+									</div>
+								</div>
+
+								<div className='w-full flex flex-1 gap-4'>
+									<SelectFormCustom
+										className='w-full'
+										control={control}
+										name='ward'
+										label='Ward/Commune'
+										placeholder='Select Ward/Commune'
+										items={wards?.map((w) => ({ id: w.id, name: w.name })) || []}
+										disabled={
+											!selectedDistrict?.id || (wards ? wards.length === 0 : false)
+										}
+										forForm={'create user'}
+									/>
+									<SelectFormCustom
+										className='w-full'
+										control={control}
+										name='label'
+										label='Address Label'
+										placeholder='Select address label'
+										items={
+											addressLabelItems?.map((al) => ({ id: al.id, name: al.name })) || []
+										}
+									/>
+								</div>
+							</div>
 						</div>
-						<div className='w-full flex flex-1 gap-4'>
-							<FormField
-								control={form.control}
-								name='ward'
-								render={({ field }) => (
-									<FormItem className='flex-1'>
-										<FormLabel>Ward/Commune</FormLabel>
-										<Select
-											onValueChange={field.onChange}
-											defaultValue={field.value}
-										>
-											<FormControl>
-												<SelectTrigger className='w-full'>
-													<SelectValue placeholder='Select ward/commune' />
-												</SelectTrigger>
-											</FormControl>
-											<SelectContent>
-												<SelectItem value='Vinh Long'>Vinh Long</SelectItem>
-												<SelectItem value='Can Tho'>Can Tho</SelectItem>
-												<SelectItem value='Ho Chi Minh'>Ho Chi Minh</SelectItem>
-											</SelectContent>
-										</Select>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name='label'
-								render={({ field }) => (
-									<FormItem className='flex-1'>
-										<FormLabel>Label</FormLabel>
-										<Select
-											onValueChange={field.onChange}
-											defaultValue={field.value}
-										>
-											<FormControl>
-												<SelectTrigger className='w-full'>
-													<SelectValue placeholder='Select label' />
-												</SelectTrigger>
-											</FormControl>
-											<SelectContent>
-												<SelectItem value='Vinh Long'>Vinh Long</SelectItem>
-												<SelectItem value='Can Tho'>Can Tho</SelectItem>
-												<SelectItem value='Ho Chi Minh'>Ho Chi Minh</SelectItem>
-											</SelectContent>
-										</Select>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-						</div>
-					</div>
-				</div>
-				<div className='w-full flex items-center justify-end'>
-					<Button type='submit'>Create</Button>
-				</div>
-			</form>
-		</Form>
+						<button
+							ref={submitBtnRef}
+							type='submit'
+							className='hidden'
+						>
+							Create
+						</button>
+					</form>
+				</Form>
+			</div>
+			<DialogFooter>
+				<DialogClose asChild>
+					<Button
+						type='button'
+						variant='outline'
+					>
+						Close
+					</Button>
+				</DialogClose>
+				<Button
+					type='submit'
+					onClick={() => {
+						if (submitBtnRef.current) {
+							submitBtnRef.current.click();
+						}
+					}}
+					disabled={
+						selectedCity?.id && (!selectedDistrict?.id || !selectedWard?.id)
+							? true
+							: false
+					}
+				>
+					Save changes
+				</Button>
+			</DialogFooter>
+		</>
 	);
 };
 

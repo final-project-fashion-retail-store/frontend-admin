@@ -1,9 +1,19 @@
-import { destroyImages, uploadImages } from '@/services';
-import { AxiosError } from 'axios';
-import { toast } from 'sonner';
 import { create } from 'zustand';
+import { AxiosError } from 'axios';
+
+import {
+	destroyImages,
+	getDistrict,
+	getProvinceCity,
+	getWardCommune,
+	uploadImages,
+} from '@/services';
+import type { DistrictType, ProvinceType, WardType } from '@/types';
 
 type Store = {
+	provinces: ProvinceType[] | null;
+	districts: DistrictType[] | null;
+	wards: WardType[] | null;
 	isUploadingImages: boolean;
 	isDestroyingImages: boolean;
 
@@ -14,9 +24,15 @@ type Store = {
 		| { public_id: string; secure_url: string }[]
 	>;
 	destroyImages: (data: { publicId: string[] }) => void;
+	getProvinces: () => void;
+	getDistricts: (provinceId: string) => void;
+	getWards: (districtId: string) => void;
 };
 
 const useGeneralStore = create<Store>((set) => ({
+	provinces: null,
+	districts: null,
+	wards: null,
 	isUploadingImages: false,
 	isDestroyingImages: false,
 
@@ -50,6 +66,42 @@ const useGeneralStore = create<Store>((set) => ({
 			}
 		} finally {
 			set({ isDestroyingImages: false });
+		}
+	},
+
+	async getProvinces() {
+		try {
+			const res = await getProvinceCity();
+			set({ provinces: res.data });
+		} catch (err) {
+			if (err instanceof AxiosError) {
+				console.log(err);
+				console.log(err?.response?.data?.message);
+			}
+		}
+	},
+
+	async getDistricts(provinceId) {
+		try {
+			const res = await getDistrict(provinceId);
+			set({ districts: res.data });
+		} catch (err) {
+			if (err instanceof AxiosError) {
+				console.log(err);
+				console.log(err?.response?.data?.message);
+			}
+		}
+	},
+
+	async getWards(districtId) {
+		try {
+			const res = await getWardCommune(districtId);
+			set({ wards: res.data });
+		} catch (err) {
+			if (err instanceof AxiosError) {
+				console.log(err);
+				console.log(err?.response?.data?.message);
+			}
 		}
 	},
 }));

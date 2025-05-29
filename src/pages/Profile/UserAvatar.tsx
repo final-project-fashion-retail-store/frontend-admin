@@ -33,8 +33,8 @@ const UserAvatar = () => {
 			toast.error('Please select an image file');
 			return;
 		}
-		if (file.size > 20 * 1024 * 1024) {
-			toast.error('File size exceeds 2MB');
+		if (file.size > 50 * 1024 * 1024) {
+			toast.error('File size exceeds 5MB');
 			return;
 		}
 

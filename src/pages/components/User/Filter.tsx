@@ -3,7 +3,9 @@ import SelectCustom from '@/components/SelectCustom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CreateUserForm from '@/pages/components/User/Form/CreateUserForm';
+import { useGeneralStore } from '@/store';
 import { Plus } from 'lucide-react';
+import { useState } from 'react';
 
 type Props = {
 	searchValue: string;
@@ -34,6 +36,21 @@ const Filter = ({
 	handleSearch,
 	handleSelectStatus,
 }: Props) => {
+	const destroyImages = useGeneralStore((state) => state.destroyImages);
+	const [imageId, setImageId] = useState<{ publicId: string[] }>({
+		publicId: [''],
+	});
+	const getImageAvatarId = (public_id: string) => {
+		setImageId({ publicId: [public_id] });
+	};
+
+	// handle when dialog closes
+	const handleOpenChange = (isOpen: boolean) => {
+		if (!isOpen && imageId) {
+			destroyImages(imageId);
+		}
+	};
+
 	return (
 		<div className='w-full flex flex-row items-center gap-4'>
 			<div className='w-1/4'>
@@ -57,7 +74,8 @@ const Filter = ({
 					className='sm:max-w-[700px]'
 					title='Create'
 					description='Create a new customer'
-					form={<CreateUserForm />}
+					form={<CreateUserForm getImageAvatarId={getImageAvatarId} />}
+					handleOpenChange={handleOpenChange}
 				>
 					<Button
 						variant={'outline'}
