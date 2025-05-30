@@ -1,10 +1,18 @@
 import {
+	completelyDeleteAddresses,
 	completelyDeleteUserAccount,
+	createAddress,
 	createUser,
 	getAllUsers,
 	updateUser,
 } from '@/services';
-import type { PaginationType, UserSendType, UserType } from '@/types';
+import useGeneralStore from '@/store/generalStore';
+import type {
+	AddressSendType,
+	PaginationType,
+	UserSendType,
+	UserType,
+} from '@/types';
 import { AxiosError } from 'axios';
 import { toast } from 'sonner';
 import { create } from 'zustand';
@@ -17,6 +25,7 @@ type Store = {
 	isCreatingUser: boolean;
 	isUpdatingUser: boolean;
 	isDeletingUser: boolean;
+	isCreatingAddress: boolean;
 
 	getAllUsers: (
 		role?: 'user' | 'staff',
@@ -25,9 +34,10 @@ type Store = {
 		sort?: string | '',
 		paginationLink?: string
 	) => void;
-	createUser: (data: UserSendType) => Promise<void | string>;
+	createUser: (data: UserSendType) => Promise<UserType>;
 	updateUser: (id: string, data: UserSendType) => void;
-	deleteUser: (id: string) => void;
+	deleteUser: (user: UserType) => void;
+	createAddress: (data: AddressSendType) => void;
 };
 
 const useManagementStore = create<Store>((set) => ({
@@ -38,19 +48,18 @@ const useManagementStore = create<Store>((set) => ({
 	isCreatingUser: false,
 	isUpdatingUser: false,
 	isDeletingUser: false,
+	isCreatingAddress: false,
 
 	async createUser(data) {
 		try {
 			set({ isCreatingUser: true });
 			const res = await createUser(data);
-			console.log(res.data);
 			toast.success('User created successfully');
+			return res.data.user;
 		} catch (err) {
 			if (err instanceof AxiosError) {
 				toast.error('Failed to create user');
-				console.log(err);
-				console.log(err?.response?.data?.message);
-				return err?.response?.data?.message;
+				throw err;
 			}
 		} finally {
 			set({ isCreatingUser: false });
@@ -101,19 +110,50 @@ const useManagementStore = create<Store>((set) => ({
 		}
 	},
 
-	async deleteUser(id) {
-		set({ isDeletingUser: true });
+	async deleteUser(user) {
 		try {
-			await completelyDeleteUserAccount(id);
+			set({ isDeletingUser: true });
+			const publicId = user.avatar?.public_id;
+			const { destroyImages } = useGeneralStore.getState();
+
+			// Create array of promises
+			const deletePromises = [
+				completelyDeleteUserAccount(user._id),
+				completelyDeleteAddresses(user._id),
+			];
+
+			// Add image deletion if avatar exists
+			if (publicId) {
+				deletePromises.push(destroyImages({ publicId: [publicId] }));
+			}
+
+			// Execute all promises concurrently
+			await Promise.all(deletePromises);
+
 			toast.success('User deleted successfully');
 		} catch (err) {
 			if (err instanceof AxiosError) {
 				console.log(err);
 				console.log(err?.response?.data?.message);
-				toast.error('Failed to deleted user');
+				toast.error('Failed to delete user');
 			}
 		} finally {
 			set({ isDeletingUser: false });
+		}
+	},
+
+	async createAddress(data) {
+		try {
+			set({ isCreatingAddress: true });
+			const res = await createAddress(data);
+			console.log(res);
+		} catch (err) {
+			if (err instanceof AxiosError) {
+				console.log(err);
+				console.log(err?.response?.data?.message);
+			}
+		} finally {
+			set({ isCreatingAddress: false });
 		}
 	},
 }));

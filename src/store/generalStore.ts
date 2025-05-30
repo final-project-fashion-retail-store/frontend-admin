@@ -23,7 +23,7 @@ type Store = {
 		| { public_id: string; secure_url: string }
 		| { public_id: string; secure_url: string }[]
 	>;
-	destroyImages: (data: { publicId: string[] }) => void;
+	destroyImages: (data: { publicId: string[] }) => Promise<void>;
 	getProvinces: () => void;
 	getDistricts: (provinceId: string) => void;
 	getWards: (districtId: string) => void;
@@ -57,7 +57,8 @@ const useGeneralStore = create<Store>((set) => ({
 	async destroyImages(data) {
 		try {
 			set({ isDestroyingImages: true });
-			await destroyImages(data);
+			const res = await destroyImages(data);
+			return res;
 		} catch (err) {
 			if (err instanceof AxiosError) {
 				console.log(err);

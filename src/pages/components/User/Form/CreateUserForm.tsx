@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
@@ -20,7 +20,8 @@ import SelectFormCustom from '@/components/SelectFormCustom';
 import { DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import Overlay from '@/components/ui/overlay';
-import { AxiosError } from 'axios';
+import { AxiosError, isAxiosError } from 'axios';
+import type { AddressSendType } from '@/types';
 
 const addressLabelItems = [
 	{
@@ -47,8 +48,18 @@ const formSchema = z.object({
 	email: z.string().email({
 		message: 'Invalid email address',
 	}),
-	phoneNumber: z.string().optional(), // Optional - not all users may have phone
-	addressLine: z.string().optional(), // Optional - address may not be required
+	phoneNumber: z
+		.string()
+		.min(1, {
+			message: 'Phone number is required',
+		})
+		.regex(/^(0|\+84)[0-9]{9}$/, {
+			message: 'Invalid phone number format',
+		})
+		.min(10, {
+			message: 'Phone number must be at least 10 digits',
+		}),
+	addressLine: z.string().optional(),
 	city: z
 		.object({
 			id: z.string(),
@@ -74,8 +85,20 @@ type Props = {
 	getImageAvatarId?: (public_url: string) => void;
 };
 const CreateUserForm = ({ getImageAvatarId }: Props) => {
-	const [isCreatingUser, createUser] = useManagementStore(
-		useShallow((state) => [state.isCreatingUser, state.createUser])
+	const [
+		isCreatingUser,
+		isCreatingAddress,
+		createAddress,
+		createUser,
+		getAllUsers,
+	] = useManagementStore(
+		useShallow((state) => [
+			state.isCreatingUser,
+			state.isCreatingAddress,
+			state.createAddress,
+			state.createUser,
+			state.getAllUsers,
+		])
 	);
 	const [
 		provinces,
@@ -102,8 +125,10 @@ const CreateUserForm = ({ getImageAvatarId }: Props) => {
 		secure_url: string;
 		public_id: string;
 	}>({ secure_url: '', public_id: '' });
+	const [hasAddressLine, setHasAddressLine] = useState(false);
 
 	const submitBtnRef = useRef<HTMLButtonElement>(null);
+	const closeBtnRef = useRef<HTMLButtonElement>(null);
 
 	// 1. Define your form.
 	const form = useForm<z.infer<typeof formSchema>>({
@@ -117,20 +142,40 @@ const CreateUserForm = ({ getImageAvatarId }: Props) => {
 			city: { id: '', name: '' },
 			district: { id: '', name: '' },
 			ward: { id: '', name: '' },
-			label: '',
+			label: 'Home',
 		},
 	});
 
-	const { control, setValue } = form;
-
-	const selectedCity = useWatch({ control, name: 'city' });
-	const selectedDistrict = useWatch({ control, name: 'district' });
-	const selectedWard = useWatch({ control, name: 'ward' });
+	const { control, setValue, watch } = form;
 
 	useEffect(() => {
 		getProvinces();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
+
+	const selectedCity = useWatch({ control, name: 'city' });
+	const selectedDistrict = useWatch({ control, name: 'district' });
+	const selectedWard = useWatch({ control, name: 'ward' });
+
+	const provinceItems = useMemo(
+		() => provinces?.map((p) => ({ id: p.id, name: p.name })) || [],
+		[provinces]
+	);
+	const districtItems = useMemo(
+		() => districts?.map((d) => ({ id: d.id, name: d.name })) || [],
+		[districts]
+	);
+	const wardItems = useMemo(
+		() => wards?.map((w) => ({ id: w.id, name: w.name })) || [],
+		[wards]
+	);
+
+	useEffect(() => {
+		const subscription = watch((value) => {
+			setHasAddressLine(!!value.addressLine);
+		});
+		return () => subscription.unsubscribe();
+	}, [watch]);
 
 	useEffect(() => {
 		if (selectedCity?.id) {
@@ -149,22 +194,57 @@ const CreateUserForm = ({ getImageAvatarId }: Props) => {
 
 	// 2. Define a submit handler.
 	async function onSubmit(values: z.infer<typeof formSchema>) {
-		if (isCreatingUser || isUploadingImages) return;
-		const adequateValues = {
-			...values,
-			role: 'user' as 'user' | 'staff',
-			avatar: {
-				url: imageUploaded.secure_url,
-				public_id: imageUploaded.public_id,
-			},
-		};
-		// If the error is undefined, it means the login was successful
-		const errorMessage = await createUser(adequateValues);
-		if (errorMessage) {
-			form.setError('email', {
-				type: 'custom',
-				message: errorMessage,
-			});
+		if (isCreatingUser || isUploadingImages || isCreatingAddress) return;
+		try {
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			const { addressLine, city, district, ward, label, ...data } = values;
+
+			const createUserData = {
+				...data,
+				role: 'user' as 'user' | 'staff',
+				avatar: {
+					url: imageUploaded.secure_url,
+					public_id: imageUploaded.public_id,
+				},
+			};
+
+			const res = await createUser(createUserData);
+
+			// create address if any
+			if (values.addressLine || values.city?.name) {
+				const addressData: AddressSendType = {
+					user: res._id,
+					fullName: res.fullName,
+					phoneNumber: res.phoneNumber,
+					addressLine: values.addressLine || '',
+					city: values.city?.name || '',
+					district: values.district?.name || '',
+					ward: values.ward?.name || '',
+					label: values.label as 'Home' | 'Work' | 'Other',
+				};
+				console.log(addressData, values);
+				await createAddress(addressData);
+			}
+
+			await getAllUsers('user');
+			// Close dialog when success
+			if (closeBtnRef.current) {
+				closeBtnRef.current.click();
+			}
+		} catch (err) {
+			if (isAxiosError(err)) {
+				console.log(err);
+				console.log(err?.response?.data?.message);
+
+				form.setError('email', {
+					type: 'custom',
+					message: err?.response?.data?.message,
+				});
+
+				if (getImageAvatarId && imageUploaded.public_id) {
+					getImageAvatarId(imageUploaded.public_id || '');
+				}
+			}
 		}
 	}
 
@@ -189,9 +269,6 @@ const CreateUserForm = ({ getImageAvatarId }: Props) => {
 			const res = await uploadImages(formData);
 			if (res && !Array.isArray(res)) {
 				setImageUploaded(res);
-				if (getImageAvatarId) {
-					getImageAvatarId(res.public_id || '');
-				}
 			}
 		} catch (err) {
 			if (err instanceof AxiosError) {
@@ -314,7 +391,9 @@ const CreateUserForm = ({ getImageAvatarId }: Props) => {
 							name='phoneNumber'
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Phone Number</FormLabel>
+									<FormLabel>
+										Phone Number <span className='text-destructive'>*</span>
+									</FormLabel>
 									<FormControl>
 										<Input
 											placeholder='Enter phone number'
@@ -353,7 +432,7 @@ const CreateUserForm = ({ getImageAvatarId }: Props) => {
 											name='city'
 											label='Province/City'
 											placeholder='Select Province/City'
-											items={provinces?.map((p) => ({ id: p.id, name: p.name })) || []}
+											items={provinceItems}
 											forForm={'create user'}
 										/>
 										<SelectFormCustom
@@ -362,7 +441,7 @@ const CreateUserForm = ({ getImageAvatarId }: Props) => {
 											name='district'
 											label='District'
 											placeholder='Select District'
-											items={districts?.map((d) => ({ id: d.id, name: d.name })) || []}
+											items={districtItems}
 											disabled={
 												!selectedCity?.id || (districts ? districts.length === 0 : false)
 											}
@@ -378,7 +457,7 @@ const CreateUserForm = ({ getImageAvatarId }: Props) => {
 										name='ward'
 										label='Ward/Commune'
 										placeholder='Select Ward/Commune'
-										items={wards?.map((w) => ({ id: w.id, name: w.name })) || []}
+										items={wardItems}
 										disabled={
 											!selectedDistrict?.id || (wards ? wards.length === 0 : false)
 										}
@@ -401,15 +480,14 @@ const CreateUserForm = ({ getImageAvatarId }: Props) => {
 							ref={submitBtnRef}
 							type='submit'
 							className='hidden'
-						>
-							Create
-						</button>
+						/>
 					</form>
 				</Form>
 			</div>
 			<DialogFooter>
 				<DialogClose asChild>
 					<Button
+						ref={closeBtnRef}
 						type='button'
 						variant='outline'
 					>
@@ -418,16 +496,17 @@ const CreateUserForm = ({ getImageAvatarId }: Props) => {
 				</DialogClose>
 				<Button
 					type='submit'
+					disabled={
+						(selectedCity?.id || hasAddressLine) &&
+						(!selectedDistrict?.id || !selectedWard?.id || !hasAddressLine)
+							? true
+							: false
+					}
 					onClick={() => {
 						if (submitBtnRef.current) {
 							submitBtnRef.current.click();
 						}
 					}}
-					disabled={
-						selectedCity?.id && (!selectedDistrict?.id || !selectedWard?.id)
-							? true
-							: false
-					}
 				>
 					Save changes
 				</Button>

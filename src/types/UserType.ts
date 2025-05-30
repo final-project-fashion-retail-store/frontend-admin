@@ -9,7 +9,7 @@ export type UserType = {
 	role: 'user' | 'staff' | 'admin';
 	phoneNumber: string;
 	avatar: { url: string; public_id: string };
-	userAddresses: UserAddressType[];
+	addresses: UserAddressType[];
 	passwordChangedAt: Date;
 	active: boolean;
 	createdAt: Date;

@@ -1,3 +1,4 @@
+import type { AddressSendType } from '@/types';
 import instance from '@/utils/axios';
 import { isAxiosError } from 'axios';
 
@@ -81,6 +82,15 @@ export const changePassword = async (data: {
 	try {
 		const res = await instance.patch('auth/change-password', data);
 
+		return res.data;
+	} catch (err) {
+		if (isAxiosError(err)) throw err;
+	}
+};
+
+export const createAddress = async (data: AddressSendType) => {
+	try {
+		const res = await instance.post('users/add-address', data);
 		return res.data;
 	} catch (err) {
 		if (isAxiosError(err)) throw err;

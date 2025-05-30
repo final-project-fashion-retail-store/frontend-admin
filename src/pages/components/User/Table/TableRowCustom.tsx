@@ -1,5 +1,5 @@
 import type { UserType } from '@/types';
-import { Fragment, use } from 'react';
+import { Fragment, use, useState } from 'react';
 
 import {
 	DropdownMenu,
@@ -27,6 +27,7 @@ const TableRowCustom = ({ index, data }: Props) => {
 	const [updateUser, deleteUser, getAllUser] = useManagementStore(
 		useShallow((state) => [state.updateUser, state.deleteUser, state.getAllUsers])
 	);
+	const [expandedRows, setExpandedRows] = useState<string[]>([]);
 
 	const { role, searchValue, active, sort, paginationLink } = use(UserContext);
 
@@ -35,9 +36,17 @@ const TableRowCustom = ({ index, data }: Props) => {
 			updateUser(data?._id, { active: action === 'activate' ? true : false });
 			getAllUser(role, searchValue, active, sort, paginationLink);
 		} else if (action === 'delete') {
-			deleteUser(data?._id);
+			deleteUser(data);
 			getAllUser(role, searchValue, active, sort, paginationLink);
 		}
+	};
+
+	const toggleRowExpansion = (customerId: string) => {
+		setExpandedRows((prev) =>
+			prev.includes(customerId)
+				? prev.filter((id) => id !== customerId)
+				: [...prev, customerId]
+		);
 	};
 
 	return (
@@ -60,17 +69,20 @@ const TableRowCustom = ({ index, data }: Props) => {
 				<TableCell>{data?.phoneNumber || 'None'}</TableCell>
 				<TableCell>
 					<div className='flex flex-col items-start justify-center gap-1'>
-						{data?.userAddresses?.length > 0 ? (
+						{data?.addresses?.length > 0 ? (
 							<>
 								<>
 									{
-										data?.userAddresses.find((address) => address?.isDefault === true)
+										data?.addresses.find((address) => address?.isDefault === true)
 											?.formattedAddress
 									}
 								</>
-								{data?.userAddresses?.length > 1 && (
-									<span className='relative inline-block pb-0.5 overflow-hidden group cursor-pointer text-sm text-muted-foreground hover:text-foreground'>
-										{`+ ${data?.userAddresses?.length - 1} more address(es)`}
+								{data?.addresses?.length > 1 && (
+									<span
+										className='relative inline-block pb-0.5 overflow-hidden group cursor-pointer text-sm text-muted-foreground hover:text-foreground'
+										onClick={() => toggleRowExpansion(data?._id)}
+									>
+										{`+ ${data?.addresses?.length - 1} more address(es)`}
 										<span className='absolute bottom-0 left-0 w-full h-[1px] bg-foreground scale-x-0 origin-left transition-transform duration-300 ease-out group-hover:scale-x-100' />
 									</span>
 								)}
@@ -126,7 +138,7 @@ const TableRowCustom = ({ index, data }: Props) => {
 					</DropdownMenu>
 				</TableCell>
 			</TableRow>
-			{data?.userAddresses?.length > 1 && (
+			{expandedRows.includes(data?._id) && (
 				<TableRow>
 					<TableCell
 						colSpan={7}
@@ -136,14 +148,14 @@ const TableRowCustom = ({ index, data }: Props) => {
 							<div className='flex flex-col justify-center items-start gap-2'>
 								<span>All Addresses:</span>
 								<ul className='space-y-2'>
-									{data?.userAddresses?.map((address) => (
+									{data?.addresses?.map((address) => (
 										<li
 											key={address?.id}
 											className='flex items-center gap-2 text-muted-foreground'
 										>
 											<MapPin className='size-4' />
 											{address?.formattedAddress}
-											<Badge variant={'outline'}>Default</Badge>
+											{address?.isDefault && <Badge variant={'outline'}>Default</Badge>}
 										</li>
 									))}
 								</ul>

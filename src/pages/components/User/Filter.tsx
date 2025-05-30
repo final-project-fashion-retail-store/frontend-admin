@@ -46,7 +46,7 @@ const Filter = ({
 
 	// handle when dialog closes
 	const handleOpenChange = (isOpen: boolean) => {
-		if (!isOpen && imageId) {
+		if (!isOpen && imageId.publicId[0]) {
 			destroyImages(imageId);
 		}
 	};

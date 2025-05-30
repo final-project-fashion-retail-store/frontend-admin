@@ -63,3 +63,11 @@ export const completelyDeleteUserAccount = async (id: string) => {
 		if (isAxiosError(err)) throw err;
 	}
 };
+
+export const completelyDeleteAddresses = async (userId: string) => {
+	try {
+		await instance.delete(`/users/delete-addresses/${userId}`);
+	} catch (err) {
+		if (isAxiosError(err)) throw err;
+	}
+};

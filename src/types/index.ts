@@ -5,3 +5,4 @@ export type { PaginationType } from './PaginationType';
 export type { ProvinceType } from './ProvinceType';
 export type { DistrictType } from './DistrictType';
 export type { WardType } from './WardType';
+export type { AddressSendType } from './AddressSendType';
