@@ -1,21 +1,36 @@
 import { useShallow } from 'zustand/react/shallow';
 
-import TableCustom from '@/pages/components/User/Table/TableCustom';
+import TableCustom from '@/pages/components/TableCustom';
 import { useManagementStore } from '@/store';
 import { useEffect, useRef, useState } from 'react';
 
 import Overlay from '@/components/ui/overlay';
 import useDebounce from '@/hooks/use-debounce';
-import UserContext, {
-	type Context,
-} from '@/pages/components/User/Context/UserContext';
-import Header from '@/pages/components/User/Header';
+import Header from '@/pages/components/Header';
 import Pagination from '@/pages/components/Pagination';
 import Filter from '@/pages/components/User/Filter';
+import type { UserType } from '@/types';
+import TableRowCustom from '@/pages/components/User/Table/TableRowCustom';
+
+type TableColumn<T> = {
+	key: keyof T;
+	label: string;
+	sortable?: boolean;
+};
+
+const userColumns: TableColumn<UserType>[] = [
+	{ key: '_id', label: 'ID' },
+	{ key: 'firstName', label: 'Name', sortable: true },
+	{ key: 'email', label: 'Email', sortable: true },
+	{ key: 'phoneNumber', label: 'Phone Number' },
+	{ key: 'addresses', label: 'Addresses' },
+	{ key: 'active', label: 'Status' },
+];
 
 const CustomerManagement = () => {
-	const [isGettingUser, isUpdatingUser, getAllUsers] = useManagementStore(
+	const [users, isGettingUser, isUpdatingUser, getAllUsers] = useManagementStore(
 		useShallow((state) => [
+			state.users,
 			state.isGettingUser,
 			state.isUpdatingUser,
 			state.getAllUsers,
@@ -34,16 +49,12 @@ const CustomerManagement = () => {
 		const active =
 			activeStatus === 'all' ? '' : activeStatus === 'active' ? true : false;
 
-		let sort = '';
-		if (sortName === 'asc') {
-			sort = 'firstName';
-		} else if (sortName === 'desc') {
-			sort = '-firstName';
-		} else if (sortEmail === 'asc') {
-			sort = 'email';
-		} else if (sortEmail === 'desc') {
-			sort = '-email';
-		}
+		const getSortString = () => {
+			if (sortName) return sortName === 'desc' ? '-firstName' : 'firstName';
+			if (sortEmail) return sortEmail === 'desc' ? '-email' : 'email';
+			return '';
+		};
+		const sort = getSortString();
 		currentSort.current = sort;
 		getAllUsers('user', debounceValue, active, sort);
 	}, [activeStatus, debounceValue, getAllUsers, sortEmail, sortName]);
@@ -59,27 +70,21 @@ const CustomerManagement = () => {
 		setActiveStatus(value);
 	};
 
-	const handleClickSortField = (field: 'name' | 'email') => {
+	const handleClickSortField = (field: string) => {
 		if (isGettingUser || isUpdatingUser) return;
 
-		if (field === 'name') {
+		const toggleSort = (current: string) => {
+			if (current === 'asc') return 'desc';
+			if (current === 'desc') return 'asc';
+			return 'asc';
+		};
+
+		if (field === 'firstName') {
 			setSortEmail('');
-			if (sortName === 'asc') {
-				setSortName('desc');
-			} else if (sortName === 'desc') {
-				setSortName('asc');
-			} else if (sortName === '') {
-				setSortName('asc');
-			}
+			setSortName(toggleSort(sortName));
 		} else if (field === 'email') {
 			setSortName('');
-			if (sortEmail === 'asc') {
-				setSortEmail('desc');
-			} else if (sortEmail === 'desc') {
-				setSortEmail('asc');
-			} else if (sortEmail === '') {
-				setSortEmail('asc');
-			}
+			setSortEmail(toggleSort(sortEmail));
 		}
 	};
 
@@ -89,43 +94,55 @@ const CustomerManagement = () => {
 		getAllUsers('user', '', '', '', paginationLink);
 	};
 
-	const contextValues: Context = {
-		role: 'user',
-		searchValue: debounceValue,
-		active:
-			activeStatus === 'all' ? '' : activeStatus === 'active' ? true : false,
-		sort: currentSort.current,
-		paginationLink,
-		handleClickSortField,
-	};
-
 	return (
-		<UserContext.Provider value={contextValues}>
-			<div className='w-full p-4 space-y-10'>
-				{/* heading */}
-				<Header
-					title='Customer Management'
-					description='Manage your customers and their information'
-				/>
-				<div className='w-full'>
-					<div className='w-full space-y-4'>
-						{isUpdatingUser && <Overlay />}
-						{/* filter */}
-						<Filter
-							searchValue={searchValue}
-							activeStatus={activeStatus}
-							handleSearch={handleSearch}
-							handleSelectStatus={handleSelectStatus}
-						/>
-						<TableCustom />
-						{/* Pagination */}
-						{!isGettingUser && (
-							<Pagination handleClickPagination={handleClickPagination} />
+		<div className='w-full p-4 space-y-10'>
+			{/* heading */}
+			<Header
+				title='Customer Management'
+				description='Manage your customers and their information'
+			/>
+			<div className='w-full'>
+				<div className='w-full space-y-4'>
+					{isUpdatingUser && <Overlay />}
+					{/* filter */}
+					<Filter
+						placeHolderSearch='Search name, email, phone'
+						searchValue={searchValue}
+						activeStatus={activeStatus}
+						handleSearch={handleSearch}
+						handleSelectStatus={handleSelectStatus}
+					/>
+					<TableCustom
+						data={users || []}
+						isGettingData={isGettingUser}
+						handleClickSortField={handleClickSortField}
+						columns={userColumns}
+						emptyMessage='There is no customer'
+						renderRow={(user, index) => (
+							<TableRowCustom
+								key={user._id}
+								index={index}
+								data={user}
+								role='user'
+								searchValue={debounceValue}
+								active={
+									activeStatus === 'all' ? '' : activeStatus === 'active' ? true : false
+								}
+								sort={currentSort.current}
+								paginationLink={paginationLink}
+							/>
 						)}
-					</div>
+					/>
+					{/* Pagination */}
+					{!isGettingUser && (
+						<Pagination
+							page='customer(s)'
+							handleClickPagination={handleClickPagination}
+						/>
+					)}
 				</div>
 			</div>
-		</UserContext.Provider>
+		</div>
 	);
 };
 

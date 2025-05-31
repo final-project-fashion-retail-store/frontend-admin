@@ -41,6 +41,7 @@ import { HugeiconsIcon } from '@hugeicons/react';
 import {
 	ChevronDown,
 	House,
+	LocationEdit,
 	LogOut,
 	UserCheck,
 	UserRoundCog,
@@ -135,7 +136,7 @@ export function AppSidebar() {
 												<SidebarMenuSubButton asChild>
 													<Link to={'manage-customers'}>
 														<Users />
-														<span>Customers</span>
+														<span>Customer</span>
 													</Link>
 												</SidebarMenuSubButton>
 											</SidebarMenuSubItem>
@@ -144,6 +145,14 @@ export function AppSidebar() {
 													<Link to={'manage-employees'}>
 														<UserCheck />
 														<span>Staff</span>
+													</Link>
+												</SidebarMenuSubButton>
+											</SidebarMenuSubItem>
+											<SidebarMenuSubItem>
+												<SidebarMenuSubButton asChild>
+													<Link to={'manage-addresses'}>
+														<LocationEdit />
+														<span>Address</span>
 													</Link>
 												</SidebarMenuSubButton>
 											</SidebarMenuSubItem>

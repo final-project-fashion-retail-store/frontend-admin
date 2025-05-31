@@ -1,8 +1,12 @@
 import {
+	completelyDeleteAddress,
 	completelyDeleteAddresses,
 	completelyDeleteUserAccount,
 	createAddress,
 	createUser,
+	editAddress,
+	getAddress,
+	getAllAddresses,
 	getAllUsers,
 	updateUser,
 } from '@/services';
@@ -10,6 +14,7 @@ import useGeneralStore from '@/store/generalStore';
 import type {
 	AddressSendType,
 	PaginationType,
+	UserAddressType,
 	UserSendType,
 	UserType,
 } from '@/types';
@@ -18,15 +23,25 @@ import { toast } from 'sonner';
 import { create } from 'zustand';
 
 type Store = {
+	pagination: PaginationType | null;
+
+	// user state
 	users: UserType[] | null;
 	selectedUser: UserType | null;
-	pagination: PaginationType | null;
 	isGettingUser: boolean;
 	isCreatingUser: boolean;
 	isUpdatingUser: boolean;
 	isDeletingUser: boolean;
-	isCreatingAddress: boolean;
 
+	// address state
+	addresses: UserAddressType[] | null;
+	selectedAddress: UserAddressType | null;
+	isGettingAddress: boolean;
+	isCreatingAddress: boolean;
+	isUpdatingAddress: boolean;
+	isDeletingAddress: boolean;
+
+	// user function
 	getAllUsers: (
 		role?: 'user' | 'staff',
 		searchValue?: string,
@@ -34,32 +49,57 @@ type Store = {
 		sort?: string | '',
 		paginationLink?: string
 	) => void;
-	createUser: (data: UserSendType) => Promise<UserType>;
+	createUser: (data: UserSendType) => Promise<string | void>;
 	updateUser: (id: string, data: UserSendType) => void;
 	deleteUser: (user: UserType) => void;
-	createAddress: (data: AddressSendType) => void;
+
+	// address function
+	getAllAddresses: (
+		searchValue?: string,
+		active?: boolean | '',
+		sort?: string | '',
+		paginationLink?: string
+	) => void;
+	getAddress: (id: string) => void;
+	createAddress: (data: AddressSendType) => Promise<void | string>;
+	updateAddress: (id: string, data: AddressSendType) => Promise<void | string>;
+	deleteAddress: (id: string) => void;
 };
 
-const useManagementStore = create<Store>((set) => ({
+const useManagementStore = create<Store>((set, get) => ({
+	pagination: null,
+
+	// user state
 	users: null,
 	selectedUser: null,
-	pagination: null,
 	isGettingUser: false,
 	isCreatingUser: false,
 	isUpdatingUser: false,
 	isDeletingUser: false,
-	isCreatingAddress: false,
 
+	// address state
+	addresses: null,
+	selectedAddress: null,
+	isGettingAddress: false,
+	isCreatingAddress: false,
+	isUpdatingAddress: false,
+	isDeletingAddress: false,
+
+	// User function
 	async createUser(data) {
 		try {
 			set({ isCreatingUser: true });
-			const res = await createUser(data);
+			await createUser(data);
+
 			toast.success('User created successfully');
-			return res.data.user;
+			const { getAllUsers } = get();
+			await getAllUsers();
 		} catch (err) {
 			if (err instanceof AxiosError) {
+				console.log(err);
+				console.log(err?.response?.data?.message);
 				toast.error('Failed to create user');
-				throw err;
+				return err?.response?.data?.message;
 			}
 		} finally {
 			set({ isCreatingUser: false });
@@ -142,11 +182,46 @@ const useManagementStore = create<Store>((set) => ({
 		}
 	},
 
+	// Address function
+	async getAllAddresses(
+		searchValue = '',
+		active = '',
+		sort = '',
+		paginationLink = ''
+	) {
+		set({ isGettingAddress: true });
+		try {
+			const res = await getAllAddresses(searchValue, active, sort, paginationLink);
+			set({ addresses: res.data.data, pagination: res.data.pagination });
+		} catch (err) {
+			if (err instanceof AxiosError) {
+				console.log(err);
+				console.log(err?.response?.data?.message);
+			}
+		} finally {
+			set({ isGettingAddress: false });
+		}
+	},
+
+	async getAddress(id) {
+		set({ isGettingAddress: true });
+		try {
+			const res = await getAddress(id);
+			set({ selectedAddress: res.data.data });
+		} catch (err) {
+			if (err instanceof AxiosError) {
+				console.log(err);
+				console.log(err?.response?.data?.message);
+			}
+		} finally {
+			set({ isGettingAddress: false });
+		}
+	},
+
 	async createAddress(data) {
 		try {
 			set({ isCreatingAddress: true });
-			const res = await createAddress(data);
-			console.log(res);
+			await createAddress(data);
 		} catch (err) {
 			if (err instanceof AxiosError) {
 				console.log(err);
@@ -154,6 +229,40 @@ const useManagementStore = create<Store>((set) => ({
 			}
 		} finally {
 			set({ isCreatingAddress: false });
+		}
+	},
+
+	async updateAddress(id, data) {
+		set({ isUpdatingAddress: true });
+		try {
+			const res = await editAddress(id, data);
+			set({ selectedAddress: res.data.data });
+			toast.success('Address updated successfully');
+		} catch (err) {
+			if (err instanceof AxiosError) {
+				console.log(err);
+				console.log(err?.response?.data?.message);
+				toast.error('Failed to update address');
+				return err?.response?.data?.message;
+			}
+		} finally {
+			set({ isUpdatingAddress: false });
+		}
+	},
+
+	async deleteAddress(id) {
+		try {
+			set({ isDeletingAddress: true });
+			await completelyDeleteAddress(id);
+			toast.success('Address deleted successfully');
+		} catch (err) {
+			if (err instanceof AxiosError) {
+				console.log(err);
+				console.log(err?.response?.data?.message);
+				toast.error('Failed to delete address');
+			}
+		} finally {
+			set({ isDeletingAddress: false });
 		}
 	},
 }));

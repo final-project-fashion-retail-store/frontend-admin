@@ -8,6 +8,7 @@ import { Plus } from 'lucide-react';
 import { useState } from 'react';
 
 type Props = {
+	placeHolderSearch?: string;
 	searchValue: string;
 	activeStatus: string;
 	handleSearch: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -31,6 +32,7 @@ const selectStatusItems = [
 ];
 
 const Filter = ({
+	placeHolderSearch,
 	searchValue,
 	activeStatus,
 	handleSearch,
@@ -57,7 +59,7 @@ const Filter = ({
 				<Input
 					type='text'
 					value={searchValue}
-					placeholder='Search name, email, phone number'
+					placeholder={placeHolderSearch || ''}
 					autoComplete='off'
 					onChange={handleSearch}
 				/>

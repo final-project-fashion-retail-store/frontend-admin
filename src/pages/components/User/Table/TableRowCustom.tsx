@@ -1,5 +1,5 @@
 import type { UserType } from '@/types';
-import { Fragment, use, useState } from 'react';
+import { Fragment, useState } from 'react';
 
 import {
 	DropdownMenu,
@@ -16,20 +16,30 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useShallow } from 'zustand/react/shallow';
 import { useManagementStore } from '@/store';
 import AlertDialogCustom from '@/components/AlertDialogCustom';
-import UserContext from '@/pages/components/User/Context/UserContext';
 
 type Props = {
-	index: number;
+	index?: number;
 	data: UserType;
+	role: 'user' | 'staff';
+	searchValue: string;
+	active: boolean | '';
+	sort: string;
+	paginationLink: string;
 };
 
-const TableRowCustom = ({ index, data }: Props) => {
+const TableRowCustom = ({
+	data,
+	role,
+	searchValue,
+	active,
+	sort,
+	paginationLink,
+}: Props) => {
 	const [updateUser, deleteUser, getAllUser] = useManagementStore(
 		useShallow((state) => [state.updateUser, state.deleteUser, state.getAllUsers])
 	);
-	const [expandedRows, setExpandedRows] = useState<string[]>([]);
 
-	const { role, searchValue, active, sort, paginationLink } = use(UserContext);
+	const [expandedRows, setExpandedRows] = useState<string[]>([]);
 
 	const handleClickAction = (action: string) => {
 		if (action === 'activate' || action === 'deactivate') {
@@ -52,7 +62,7 @@ const TableRowCustom = ({ index, data }: Props) => {
 	return (
 		<Fragment>
 			<TableRow>
-				<TableCell className='font-medium'>{index + 1}</TableCell>
+				<TableCell className='font-medium'>{data?._id}</TableCell>
 				<TableCell>
 					<div className='flex flex-row items-center justify-start space-x-2'>
 						<Avatar>
@@ -150,7 +160,7 @@ const TableRowCustom = ({ index, data }: Props) => {
 								<ul className='space-y-2'>
 									{data?.addresses?.map((address) => (
 										<li
-											key={address?.id}
+											key={address?._id}
 											className='flex items-center gap-2 text-muted-foreground'
 										>
 											<MapPin className='size-4' />

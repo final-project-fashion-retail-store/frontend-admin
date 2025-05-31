@@ -20,8 +20,7 @@ import SelectFormCustom from '@/components/SelectFormCustom';
 import { DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import Overlay from '@/components/ui/overlay';
-import { AxiosError, isAxiosError } from 'axios';
-import type { AddressSendType } from '@/types';
+import { AxiosError } from 'axios';
 
 const addressLabelItems = [
 	{
@@ -85,19 +84,10 @@ type Props = {
 	getImageAvatarId?: (public_url: string) => void;
 };
 const CreateUserForm = ({ getImageAvatarId }: Props) => {
-	const [
-		isCreatingUser,
-		isCreatingAddress,
-		createAddress,
-		createUser,
-		getAllUsers,
-	] = useManagementStore(
+	const [isCreatingUser, createUser] = useManagementStore(
 		useShallow((state) => [
 			state.isCreatingUser,
-			state.isCreatingAddress,
-			state.createAddress,
 			state.createUser,
-			state.getAllUsers,
 		])
 	);
 	const [
@@ -194,57 +184,36 @@ const CreateUserForm = ({ getImageAvatarId }: Props) => {
 
 	// 2. Define a submit handler.
 	async function onSubmit(values: z.infer<typeof formSchema>) {
-		if (isCreatingUser || isUploadingImages || isCreatingAddress) return;
-		try {
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			const { addressLine, city, district, ward, label, ...data } = values;
+		if (isCreatingUser || isUploadingImages) return;
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const { addressLine, city, district, ward, label, ...data } = values;
 
-			const createUserData = {
-				...data,
-				role: 'user' as 'user' | 'staff',
-				avatar: {
-					url: imageUploaded.secure_url,
-					public_id: imageUploaded.public_id,
-				},
-			};
+		const createUserData = {
+			...data,
+			role: 'user' as 'user' | 'staff',
+			avatar: {
+				url: imageUploaded.secure_url,
+				public_id: imageUploaded.public_id,
+			},
+		};
 
-			const res = await createUser(createUserData);
+		const errorMessage = await createUser(createUserData);
 
-			// create address if any
-			if (values.addressLine || values.city?.name) {
-				const addressData: AddressSendType = {
-					user: res._id,
-					fullName: res.fullName,
-					phoneNumber: res.phoneNumber,
-					addressLine: values.addressLine || '',
-					city: values.city?.name || '',
-					district: values.district?.name || '',
-					ward: values.ward?.name || '',
-					label: values.label as 'Home' | 'Work' | 'Other',
-				};
-				console.log(addressData, values);
-				await createAddress(addressData);
+		if (errorMessage) {
+			form.setError('email', {
+				type: 'custom',
+				message: errorMessage,
+			});
+
+			if (getImageAvatarId && imageUploaded.public_id) {
+				getImageAvatarId(imageUploaded.public_id || '');
 			}
+			return;
+		}
 
-			await getAllUsers('user');
-			// Close dialog when success
-			if (closeBtnRef.current) {
-				closeBtnRef.current.click();
-			}
-		} catch (err) {
-			if (isAxiosError(err)) {
-				console.log(err);
-				console.log(err?.response?.data?.message);
-
-				form.setError('email', {
-					type: 'custom',
-					message: err?.response?.data?.message,
-				});
-
-				if (getImageAvatarId && imageUploaded.public_id) {
-					getImageAvatarId(imageUploaded.public_id || '');
-				}
-			}
+		// Close dialog when success
+		if (closeBtnRef.current) {
+			closeBtnRef.current.click();
 		}
 	}
 

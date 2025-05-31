@@ -1,6 +1,6 @@
 export type UserAddressType = {
-	id: string;
-	user: string;
+	_id: string;
+	user: string | { email: string };
 	fullName: string;
 	phoneNumber: string;
 	addressLine: string;
@@ -10,4 +10,5 @@ export type UserAddressType = {
 	ward: string;
 	isDefault: boolean;
 	label: string;
+	active: boolean;
 };

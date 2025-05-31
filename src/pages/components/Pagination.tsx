@@ -3,15 +3,17 @@ import { useManagementStore } from '@/store';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 type Props = {
+	page?: string;
 	handleClickPagination: (paginationLink: string) => void;
 };
 
-const Pagination = ({ handleClickPagination }: Props) => {
+const Pagination = ({ page, handleClickPagination }: Props) => {
 	const pagination = useManagementStore((state) => state.pagination);
+
 	return (
 		<div className='w-full flex flex-row items-center justify-between'>
 			<span className='text-muted-foreground text-sm'>
-				{`Showing ${pagination?.accumulator} of ${pagination?.totalDocs} users`}
+				{`Showing ${pagination?.accumulator} of ${pagination?.totalDocs} ${page}`}
 			</span>
 			{pagination && pagination.totalPages > 1 && (
 				<div className='h-full flex items-center space-x-4 p-2'>
