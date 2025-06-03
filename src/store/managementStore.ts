@@ -50,8 +50,9 @@ type Store = {
 		paginationLink?: string
 	) => void;
 	createUser: (data: UserSendType) => Promise<string | void>;
-	updateUser: (id: string, data: UserSendType) => void;
+	updateUser: (id: string, data: UserSendType) => Promise<string | void>;
 	deleteUser: (user: UserType) => void;
+	setSelectedUser: (user: UserType) => void;
 
 	// address function
 	getAllAddresses: (
@@ -64,6 +65,7 @@ type Store = {
 	createAddress: (data: AddressSendType) => Promise<void | string>;
 	updateAddress: (id: string, data: AddressSendType) => Promise<void | string>;
 	deleteAddress: (id: string) => void;
+	setSelectedAddress: (address: UserAddressType) => void;
 };
 
 const useManagementStore = create<Store>((set, get) => ({
@@ -86,6 +88,10 @@ const useManagementStore = create<Store>((set, get) => ({
 	isDeletingAddress: false,
 
 	// User function
+	setSelectedUser(user) {
+		set({ selectedUser: user });
+	},
+
 	async createUser(data) {
 		try {
 			set({ isCreatingUser: true });
@@ -134,16 +140,17 @@ const useManagementStore = create<Store>((set, get) => ({
 	},
 
 	async updateUser(id, data) {
-		set({ isUpdatingUser: true });
 		try {
-			const res = await updateUser(id, data);
-			set({ selectedUser: res.data.data });
+			set({ isUpdatingUser: true });
+			await updateUser(id, data);
+			set({ selectedUser: null });
 			toast.success('User updated successfully');
 		} catch (err) {
 			if (err instanceof AxiosError) {
 				console.log(err);
 				console.log(err?.response?.data?.message);
 				toast.error('Failed to update user');
+				return err?.response?.data?.message;
 			}
 		} finally {
 			set({ isUpdatingUser: false });
@@ -183,6 +190,10 @@ const useManagementStore = create<Store>((set, get) => ({
 	},
 
 	// Address function
+	async setSelectedAddress(address) {
+		set({ selectedAddress: address });
+	},
+
 	async getAllAddresses(
 		searchValue = '',
 		active = '',
@@ -222,10 +233,16 @@ const useManagementStore = create<Store>((set, get) => ({
 		try {
 			set({ isCreatingAddress: true });
 			await createAddress(data);
+
+			const { getAllAddresses } = get();
+			await getAllAddresses();
+			toast.success('Address created successfully');
 		} catch (err) {
 			if (err instanceof AxiosError) {
+				toast.error('Failed to create address');
 				console.log(err);
 				console.log(err?.response?.data?.message);
+				return err?.response?.data?.message;
 			}
 		} finally {
 			set({ isCreatingAddress: false });
@@ -233,10 +250,9 @@ const useManagementStore = create<Store>((set, get) => ({
 	},
 
 	async updateAddress(id, data) {
-		set({ isUpdatingAddress: true });
 		try {
-			const res = await editAddress(id, data);
-			set({ selectedAddress: res.data.data });
+			set({ isUpdatingAddress: true });
+			await editAddress(id, data);
 			toast.success('Address updated successfully');
 		} catch (err) {
 			if (err instanceof AxiosError) {

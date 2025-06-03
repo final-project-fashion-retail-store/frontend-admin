@@ -1,11 +1,5 @@
-import DialogCustom from '@/components/DialogCustom';
 import SelectCustom from '@/components/SelectCustom';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import CreateUserForm from '@/pages/components/User/Form/CreateUserForm';
-import { useGeneralStore } from '@/store';
-import { Plus } from 'lucide-react';
-import { useState } from 'react';
 
 type Props = {
 	placeHolderSearch?: string;
@@ -13,6 +7,7 @@ type Props = {
 	activeStatus: string;
 	handleSearch: (e: React.ChangeEvent<HTMLInputElement>) => void;
 	handleSelectStatus: (value: string) => void;
+	formDialog: React.ReactNode;
 };
 
 // Select status items
@@ -37,55 +32,32 @@ const Filter = ({
 	activeStatus,
 	handleSearch,
 	handleSelectStatus,
+	formDialog,
 }: Props) => {
-	const destroyImages = useGeneralStore((state) => state.destroyImages);
-	const [imageId, setImageId] = useState<{ publicId: string[] }>({
-		publicId: [''],
-	});
-	const getImageAvatarId = (public_id: string) => {
-		setImageId({ publicId: [public_id] });
-	};
-
-	// handle when dialog closes
-	const handleOpenChange = (isOpen: boolean) => {
-		if (!isOpen && imageId.publicId[0]) {
-			destroyImages(imageId);
-		}
-	};
-
 	return (
-		<div className='w-full flex flex-row items-center gap-4'>
-			<div className='w-1/4'>
-				<Input
-					type='text'
-					value={searchValue}
-					placeholder={placeHolderSearch || ''}
-					autoComplete='off'
-					onChange={handleSearch}
-				/>
+		<div className='w-full flex flex-row items-center'>
+			<div className='w-3/4'>
+				<div className='w-full flex max-lg:flex-col gap-4 max-lg:gap-1'>
+					<Input
+						className='xl:w-1/2'
+						type='text'
+						value={searchValue}
+						placeholder={placeHolderSearch || ''}
+						autoComplete='off'
+						onChange={handleSearch}
+					/>
+					<SelectCustom
+						className='w-[140px]'
+						triggerPlaceHolder='Status'
+						items={selectStatusItems}
+						defaultValue={activeStatus}
+						onValueChange={handleSelectStatus}
+					/>
+					<div className='max-lg:block hidden'>{formDialog}</div>
+				</div>
 			</div>
-			<div className='w-3/4 flex flex-row items-center justify-start gap-4'>
-				<SelectCustom
-					className='w-[140px]'
-					triggerPlaceHolder='Status'
-					items={selectStatusItems}
-					defaultValue={activeStatus}
-					onValueChange={handleSelectStatus}
-				/>
-				<DialogCustom
-					className='sm:max-w-[700px]'
-					title='Create'
-					description='Create a new customer'
-					form={<CreateUserForm getImageAvatarId={getImageAvatarId} />}
-					handleOpenChange={handleOpenChange}
-				>
-					<Button
-						variant={'outline'}
-						className='size-10 rounded-sm'
-					>
-						<Plus className='size-6' />
-					</Button>
-				</DialogCustom>
+			<div className='w-1/4 lg:flex hidden flex-row items-center justify-end min-[1281px]:pr-10'>
+				{formDialog}
 			</div>
 		</div>
 	);

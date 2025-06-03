@@ -11,7 +11,7 @@ import Filter from '@/pages/components/User/Filter';
 import type { UserType } from '@/types';
 import TableRowCustom from '@/pages/components/User/Table/TableRowCustom';
 import DialogCustom from '@/components/DialogCustom';
-import CreateUserForm from '@/pages/components/User/Form/UserForm';
+import UserForm from '@/pages/components/User/Form/UserForm';
 import { Button } from '@/components/ui/button';
 import { useGeneralStore, useManagementStore } from '@/store';
 
@@ -30,7 +30,7 @@ const userColumns: TableColumn<UserType>[] = [
 	{ key: 'active', label: 'Status' },
 ];
 
-const CustomerManagement = () => {
+const StaffManagement = () => {
 	const [users, isGettingUser, isUpdatingUser, getAllUsers] = useManagementStore(
 		useShallow((state) => [
 			state.users,
@@ -44,7 +44,7 @@ const CustomerManagement = () => {
 	const [activeStatus, setActiveStatus] = useState<string>('all');
 	const [searchValue, setSearchValue] = useState('');
 	const [paginationLink, setPaginationLink] = useState<string>('');
-	const [isCreatedCustomer, setIsCreatedCustomer] = useState(false);
+	const [isCreatedStaff, setIsCreatedStaff] = useState(false);
 	const destroyImages = useGeneralStore((state) => state.destroyImages);
 	const [imageId, setImageId] = useState<{ publicId: string[] }>({
 		publicId: [''],
@@ -64,7 +64,7 @@ const CustomerManagement = () => {
 		};
 		const sort = getSortString();
 		currentSort.current = sort;
-		getAllUsers('user', debounceValue, active, sort);
+		getAllUsers('staff', debounceValue, active, sort);
 	}, [activeStatus, debounceValue, getAllUsers, sortEmail, sortName]);
 
 	const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,7 +108,7 @@ const CustomerManagement = () => {
 
 	// handle when dialog closes
 	const handleOpenChange = (isOpen: boolean) => {
-		if (!isOpen && imageId.publicId[0] && !isCreatedCustomer) {
+		if (!isOpen && imageId.publicId[0] && !isCreatedStaff) {
 			destroyImages(imageId);
 		}
 	};
@@ -117,8 +117,8 @@ const CustomerManagement = () => {
 		<div className='w-full p-4 space-y-10'>
 			{/* heading */}
 			<Header
-				title='Customer Management'
-				description='Manage customers and their information'
+				title='Staff Management'
+				description='Manage staffs and their information'
 			/>
 			<div className='w-full'>
 				<div className='w-full space-y-4'>
@@ -134,12 +134,12 @@ const CustomerManagement = () => {
 							<DialogCustom
 								className='sm:max-w-[700px]'
 								title='Create'
-								description='Create a new customer'
+								description='Create a new staff'
 								form={
-									<CreateUserForm
-										role='user'
+									<UserForm
+										role='staff'
 										getImageAvatarId={getImageAvatarId}
-										setIsCreatedUser={setIsCreatedCustomer}
+										setIsCreatedUser={setIsCreatedStaff}
 									/>
 								}
 								handleOpenChange={handleOpenChange}
@@ -158,13 +158,13 @@ const CustomerManagement = () => {
 						isGettingData={isGettingUser}
 						handleClickSortField={handleClickSortField}
 						columns={userColumns}
-						emptyMessage='There is no customer'
+						emptyMessage='There is no staff'
 						renderRow={(user, index) => (
 							<TableRowCustom
 								key={user._id}
 								index={index}
 								data={user}
-								role='user'
+								role='staff'
 								searchValue={debounceValue}
 								active={
 									activeStatus === 'all' ? '' : activeStatus === 'active' ? true : false
@@ -174,9 +174,9 @@ const CustomerManagement = () => {
 								dialogTitle='Edit'
 								dialogDescription='Edit staff'
 								form={
-									<CreateUserForm
-										role='user'
-										setIsCreatedUser={setIsCreatedCustomer}
+									<UserForm
+										role='staff'
+										setIsCreatedUser={setIsCreatedStaff}
 									/>
 								}
 								dialogClassName='sm:max-w-[700px]'
@@ -186,7 +186,7 @@ const CustomerManagement = () => {
 					{/* Pagination */}
 					{!isGettingUser && (
 						<Pagination
-							page='customer(s)'
+							page='staff(s)'
 							handleClickPagination={handleClickPagination}
 						/>
 					)}
@@ -196,4 +196,4 @@ const CustomerManagement = () => {
 	);
 };
 
-export default CustomerManagement;
+export default StaffManagement;

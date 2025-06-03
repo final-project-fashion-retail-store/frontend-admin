@@ -16,6 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useShallow } from 'zustand/react/shallow';
 import { useManagementStore } from '@/store';
 import AlertDialogCustom from '@/components/AlertDialogCustom';
+import DialogCustom from '@/components/DialogCustom';
 
 type Props = {
 	index?: number;
@@ -25,6 +26,10 @@ type Props = {
 	active: boolean | '';
 	sort: string;
 	paginationLink: string;
+	dialogClassName: string;
+	dialogTitle: string;
+	dialogDescription: string;
+	form: React.ReactNode;
 };
 
 const TableRowCustom = ({
@@ -34,20 +39,32 @@ const TableRowCustom = ({
 	active,
 	sort,
 	paginationLink,
+	dialogClassName,
+	dialogTitle,
+	dialogDescription,
+	form,
 }: Props) => {
-	const [updateUser, deleteUser, getAllUser] = useManagementStore(
-		useShallow((state) => [state.updateUser, state.deleteUser, state.getAllUsers])
-	);
+	const [updateUser, deleteUser, getAllUser, setSelectedUser] =
+		useManagementStore(
+			useShallow((state) => [
+				state.updateUser,
+				state.deleteUser,
+				state.getAllUsers,
+				state.setSelectedUser,
+			])
+		);
 
 	const [expandedRows, setExpandedRows] = useState<string[]>([]);
 
-	const handleClickAction = (action: string) => {
+	const handleClickAction = async (action: string) => {
 		if (action === 'activate' || action === 'deactivate') {
-			updateUser(data?._id, { active: action === 'activate' ? true : false });
-			getAllUser(role, searchValue, active, sort, paginationLink);
+			await updateUser(data?._id, {
+				active: action === 'activate' ? true : false,
+			});
+			await getAllUser(role, searchValue, active, sort, paginationLink);
 		} else if (action === 'delete') {
-			deleteUser(data);
-			getAllUser(role, searchValue, active, sort, paginationLink);
+			await deleteUser(data);
+			await getAllUser(role, searchValue, active, sort, paginationLink);
 		}
 	};
 
@@ -103,7 +120,7 @@ const TableRowCustom = ({
 					</div>
 				</TableCell>
 				<TableCell>
-					<Badge className={`${data?.active ? 'bg-primary' : 'bg-destructive'}`}>
+					<Badge className={`${data?.active ? 'bg-emerald-500' : 'bg-destructive'}`}>
 						{data?.active ? 'Active' : 'Inactive'}
 					</Badge>
 				</TableCell>
@@ -119,7 +136,19 @@ const TableRowCustom = ({
 						<DropdownMenuContent>
 							<DropdownMenuLabel>Action</DropdownMenuLabel>
 							<DropdownMenuSeparator />
-							<DropdownMenuItem>Edit</DropdownMenuItem>
+							<DialogCustom
+								className={dialogClassName}
+								title={dialogTitle}
+								description={dialogDescription}
+								form={form}
+							>
+								<DropdownMenuItem
+									onSelect={(e) => e.preventDefault()}
+									onClick={() => setSelectedUser(data)}
+								>
+									Edit
+								</DropdownMenuItem>
+							</DialogCustom>
 							<AlertDialogCustom
 								title={`Are you sure you want to ${
 									data?.active ? 'deactivate' : 'activate'

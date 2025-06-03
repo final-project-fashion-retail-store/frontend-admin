@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
@@ -16,26 +17,10 @@ import { Input } from '@/components/ui/input';
 import { Upload, User } from 'lucide-react';
 import { useGeneralStore, useManagementStore } from '@/store';
 import { useShallow } from 'zustand/react/shallow';
-import SelectFormCustom from '@/components/SelectFormCustom';
 import { DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import Overlay from '@/components/ui/overlay';
 import { AxiosError } from 'axios';
-
-const addressLabelItems = [
-	{
-		id: 'Home',
-		name: 'Home',
-	},
-	{
-		id: 'Work',
-		name: 'Work',
-	},
-	{
-		id: 'Other',
-		name: 'Other',
-	},
-];
 
 const formSchema = z.object({
 	firstName: z.string().min(1, {
@@ -58,64 +43,51 @@ const formSchema = z.object({
 		.min(10, {
 			message: 'Phone number must be at least 10 digits',
 		}),
-	addressLine: z.string().optional(),
-	city: z
-		.object({
-			id: z.string(),
-			name: z.string(),
-		})
-		.optional(),
-	district: z
-		.object({
-			id: z.string(),
-			name: z.string(),
-		})
-		.optional(),
-	ward: z
-		.object({
-			id: z.string(),
-			name: z.string(),
-		})
-		.optional(),
-	label: z.string().optional(),
 });
 
 type Props = {
+	role: 'user' | 'staff';
+	setIsCreatedUser?: Dispatch<SetStateAction<boolean>>;
 	getImageAvatarId?: (public_url: string) => void;
 };
-const CreateUserForm = ({ getImageAvatarId }: Props) => {
-	const [isCreatingUser, createUser] = useManagementStore(
+const UserForm = ({ role, setIsCreatedUser, getImageAvatarId }: Props) => {
+	const [
+		isCreatingUser,
+		isUpdatingUser,
+		createUser,
+		updateUser,
+		getAllUsers,
+		selectedUser,
+	] = useManagementStore(
 		useShallow((state) => [
 			state.isCreatingUser,
+			state.isUpdatingUser,
 			state.createUser,
+			state.updateUser,
+			state.getAllUsers,
+			state.selectedUser,
 		])
 	);
-	const [
-		provinces,
-		districts,
-		wards,
-		getProvinces,
-		getDistricts,
-		getWards,
-		isUploadingImages,
-		uploadImages,
-	] = useGeneralStore(
-		useShallow((state) => [
-			state.provinces,
-			state.districts,
-			state.wards,
-			state.getProvinces,
-			state.getDistricts,
-			state.getWards,
-			state.isUploadingImages,
-			state.uploadImages,
-		])
-	);
+	const [isUploadingImages, isDestroyingImages, uploadImages, destroyImages] =
+		useGeneralStore(
+			useShallow((state) => [
+				state.isUploadingImages,
+				state.isDestroyingImages,
+				state.uploadImages,
+				state.destroyImages,
+			])
+		);
 	const [imageUploaded, setImageUploaded] = useState<{
 		secure_url: string;
 		public_id: string;
-	}>({ secure_url: '', public_id: '' });
-	const [hasAddressLine, setHasAddressLine] = useState(false);
+	}>(
+		selectedUser
+			? {
+					secure_url: selectedUser?.avatar.url,
+					public_id: selectedUser?.avatar.public_id,
+			  }
+			: { secure_url: '', public_id: '' }
+	);
 
 	const submitBtnRef = useRef<HTMLButtonElement>(null);
 	const closeBtnRef = useRef<HTMLButtonElement>(null);
@@ -123,93 +95,59 @@ const CreateUserForm = ({ getImageAvatarId }: Props) => {
 	// 1. Define your form.
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
-		defaultValues: {
-			firstName: '',
-			lastName: '',
-			email: '',
-			phoneNumber: '',
-			addressLine: '',
-			city: { id: '', name: '' },
-			district: { id: '', name: '' },
-			ward: { id: '', name: '' },
-			label: 'Home',
-		},
+		defaultValues: selectedUser
+			? {
+					firstName: selectedUser.firstName,
+					lastName: selectedUser.lastName,
+					email: selectedUser.email,
+					phoneNumber: selectedUser.phoneNumber,
+			  }
+			: {
+					firstName: '',
+					lastName: '',
+					email: '',
+					phoneNumber: '',
+			  },
 	});
-
-	const { control, setValue, watch } = form;
-
-	useEffect(() => {
-		getProvinces();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
-
-	const selectedCity = useWatch({ control, name: 'city' });
-	const selectedDistrict = useWatch({ control, name: 'district' });
-	const selectedWard = useWatch({ control, name: 'ward' });
-
-	const provinceItems = useMemo(
-		() => provinces?.map((p) => ({ id: p.id, name: p.name })) || [],
-		[provinces]
-	);
-	const districtItems = useMemo(
-		() => districts?.map((d) => ({ id: d.id, name: d.name })) || [],
-		[districts]
-	);
-	const wardItems = useMemo(
-		() => wards?.map((w) => ({ id: w.id, name: w.name })) || [],
-		[wards]
-	);
-
-	useEffect(() => {
-		const subscription = watch((value) => {
-			setHasAddressLine(!!value.addressLine);
-		});
-		return () => subscription.unsubscribe();
-	}, [watch]);
-
-	useEffect(() => {
-		if (selectedCity?.id) {
-			setValue('district', undefined);
-			setValue('ward', undefined);
-			getDistricts(selectedCity.id);
-		}
-	}, [selectedCity?.id, getDistricts, setValue]);
-
-	useEffect(() => {
-		if (selectedDistrict?.id) {
-			setValue('ward', undefined);
-			getWards(selectedDistrict.id);
-		}
-	}, [selectedDistrict?.id, getWards, setValue]);
 
 	// 2. Define a submit handler.
 	async function onSubmit(values: z.infer<typeof formSchema>) {
-		if (isCreatingUser || isUploadingImages) return;
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const { addressLine, city, district, ward, label, ...data } = values;
+		if (
+			isCreatingUser ||
+			isUploadingImages ||
+			isDestroyingImages ||
+			isUpdatingUser
+		)
+			return;
 
-		const createUserData = {
-			...data,
-			role: 'user' as 'user' | 'staff',
+		const data = {
+			...values,
+			role,
 			avatar: {
 				url: imageUploaded.secure_url,
 				public_id: imageUploaded.public_id,
 			},
 		};
 
-		const errorMessage = await createUser(createUserData);
+		let errMessage;
 
-		if (errorMessage) {
+		if (selectedUser) {
+			errMessage = await updateUser(selectedUser._id, data);
+		} else {
+			errMessage = await createUser(data);
+		}
+
+		if (errMessage) {
 			form.setError('email', {
 				type: 'custom',
-				message: errorMessage,
+				message: errMessage,
 			});
-
-			if (getImageAvatarId && imageUploaded.public_id) {
-				getImageAvatarId(imageUploaded.public_id || '');
-			}
 			return;
 		}
+
+		await getAllUsers(role);
+
+		setIsCreatedUser?.(true);
 
 		// Close dialog when success
 		if (closeBtnRef.current) {
@@ -234,10 +172,18 @@ const CreateUserForm = ({ getImageAvatarId }: Props) => {
 		formData.append('images', file);
 
 		try {
+			// Destroy image first If any (update case)
+			if (imageUploaded.public_id) {
+				await destroyImages({ publicId: [imageUploaded.public_id] });
+			}
+
 			// Then upload new image
 			const res = await uploadImages(formData);
 			if (res && !Array.isArray(res)) {
 				setImageUploaded(res);
+				if (getImageAvatarId && res.public_id) {
+					getImageAvatarId(res.public_id || '');
+				}
 			}
 		} catch (err) {
 			if (err instanceof AxiosError) {
@@ -250,7 +196,7 @@ const CreateUserForm = ({ getImageAvatarId }: Props) => {
 
 	return (
 		<>
-			{(isUploadingImages || isCreatingUser) && <Overlay />}
+			{(isUploadingImages || isDestroyingImages) && <Overlay />}
 			<div className='flex-1 overflow-y-auto overflow-x-hidden px-2'>
 				<Form {...form}>
 					<form
@@ -348,6 +294,7 @@ const CreateUserForm = ({ getImageAvatarId }: Props) => {
 									<FormControl>
 										<Input
 											placeholder='Enter email'
+											disabled={!!selectedUser}
 											{...field}
 										/>
 									</FormControl>
@@ -373,78 +320,6 @@ const CreateUserForm = ({ getImageAvatarId }: Props) => {
 								</FormItem>
 							)}
 						/>
-						{/* Address */}
-						<div className='w-full'>
-							<h3 className='font-semibold text-base py-2'>Address Information</h3>
-							<div className='space-y-4'>
-								<FormField
-									control={form.control}
-									name='addressLine'
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Address Line</FormLabel>
-											<FormControl>
-												<Input
-													placeholder='Enter street address'
-													{...field}
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-								<div className='w-full flex flex-1 gap-4'>
-									<div className='w-full flex flex-1 gap-4'>
-										<SelectFormCustom
-											className='w-full'
-											control={control}
-											name='city'
-											label='Province/City'
-											placeholder='Select Province/City'
-											items={provinceItems}
-											forForm={'create user'}
-										/>
-										<SelectFormCustom
-											className='w-full'
-											control={control}
-											name='district'
-											label='District'
-											placeholder='Select District'
-											items={districtItems}
-											disabled={
-												!selectedCity?.id || (districts ? districts.length === 0 : false)
-											}
-											forForm={'create user'}
-										/>
-									</div>
-								</div>
-
-								<div className='w-full flex flex-1 gap-4'>
-									<SelectFormCustom
-										className='w-full'
-										control={control}
-										name='ward'
-										label='Ward/Commune'
-										placeholder='Select Ward/Commune'
-										items={wardItems}
-										disabled={
-											!selectedDistrict?.id || (wards ? wards.length === 0 : false)
-										}
-										forForm={'create user'}
-									/>
-									<SelectFormCustom
-										className='w-full'
-										control={control}
-										name='label'
-										label='Address Label'
-										placeholder='Select address label'
-										items={
-											addressLabelItems?.map((al) => ({ id: al.id, name: al.name })) || []
-										}
-									/>
-								</div>
-							</div>
-						</div>
 						<button
 							ref={submitBtnRef}
 							type='submit'
@@ -465,23 +340,17 @@ const CreateUserForm = ({ getImageAvatarId }: Props) => {
 				</DialogClose>
 				<Button
 					type='submit'
-					disabled={
-						(selectedCity?.id || hasAddressLine) &&
-						(!selectedDistrict?.id || !selectedWard?.id || !hasAddressLine)
-							? true
-							: false
-					}
 					onClick={() => {
 						if (submitBtnRef.current) {
 							submitBtnRef.current.click();
 						}
 					}}
 				>
-					Save changes
+					Create
 				</Button>
 			</DialogFooter>
 		</>
 	);
 };
 
-export default CreateUserForm;
+export default UserForm;

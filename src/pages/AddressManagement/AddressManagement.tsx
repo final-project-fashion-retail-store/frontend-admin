@@ -9,6 +9,10 @@ import { useShallow } from 'zustand/react/shallow';
 import Pagination from '@/pages/components/Pagination';
 import type { UserAddressType } from '@/types';
 import Overlay from '@/components/ui/overlay';
+import DialogCustom from '@/components/DialogCustom';
+import AddressForm from '@/pages/AddressManagement/Form/AddressForm';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 
 type TableColumn<T> = {
 	key: keyof T;
@@ -32,15 +36,24 @@ const addressColumns: TableColumn<UserAddressType>[] = [
 ];
 
 const AddressManagement = () => {
-	const [addresses, isUpdatingAddress, isGettingAddress, getAllAddresses] =
-		useManagementStore(
-			useShallow((state) => [
-				state.addresses,
-				state.isUpdatingAddress,
-				state.isGettingAddress,
-				state.getAllAddresses,
-			])
-		);
+	const [
+		addresses,
+		isCreatingAddress,
+		isUpdatingAddress,
+		isDeletingAddress,
+		isGettingAddress,
+		getAllAddresses,
+	] = useManagementStore(
+		useShallow((state) => [
+			state.addresses,
+			state.isCreatingAddress,
+			state.isUpdatingAddress,
+			state.isDeletingAddress,
+			state.isGettingAddress,
+			state.getAllAddresses,
+		])
+	);
+
 	const [sortConfig, setSortConfig] = useState({ field: '', direction: '' });
 	const [activeStatus, setActiveStatus] = useState<string>('all');
 	const [searchValue, setSearchValue] = useState('');
@@ -110,9 +123,11 @@ const AddressManagement = () => {
 				title='Address Management'
 				description='Manage your address and their information'
 			/>
-			<div className='w-full'>
+			<div className='w-full '>
 				<div className='w-full space-y-4'>
-					{isUpdatingAddress && <Overlay />}
+					{(isUpdatingAddress || isCreatingAddress || isDeletingAddress) && (
+						<Overlay />
+					)}
 					{/* filter */}
 					<Filter
 						placeHolderSearch='Search user id, name, phone, city, district, etc'
@@ -120,13 +135,29 @@ const AddressManagement = () => {
 						activeStatus={activeStatus}
 						handleSearch={handleSearch}
 						handleSelectStatus={handleSelectStatus}
+						formDialog={
+							<DialogCustom
+								className='sm:max-w-[700px]'
+								title='Create'
+								description='Create a new address'
+								form={<AddressForm />}
+								// handleOpenChange={handleOpenChange}
+							>
+								<Button
+									variant={'outline'}
+									className='size-10 rounded-sm'
+								>
+									<Plus className='size-6' />
+								</Button>
+							</DialogCustom>
+						}
 					/>
 					<TableCustom
 						data={addresses || []}
 						isGettingData={isGettingAddress}
 						handleClickSortField={handleClickSortField}
 						columns={addressColumns}
-						emptyMessage='There is no customer'
+						emptyMessage='There is no address'
 						renderRow={(address, index) => (
 							<TableRowCustom
 								key={address._id}
@@ -138,6 +169,10 @@ const AddressManagement = () => {
 								}
 								sort={currentSort.current}
 								paginationLink={paginationLink}
+								dialogTitle='Edit'
+								dialogDescription='Create an address'
+								form={<AddressForm />}
+								dialogClassName='sm:max-w-[700px]'
 							/>
 						)}
 					/>

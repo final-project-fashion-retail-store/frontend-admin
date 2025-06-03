@@ -29,7 +29,7 @@ type Props<T extends FieldValues> = {
 	className?: string;
 	forForm?: 'create user' | '';
 	required?: boolean;
-	disabled?: boolean;
+	onValueChange?: (value: string, fieldName: string) => void;
 };
 
 const SelectFormCustom = <T extends FieldValues>({
@@ -39,30 +39,24 @@ const SelectFormCustom = <T extends FieldValues>({
 	placeholder = 'Select an option',
 	items,
 	className,
-	forForm = '',
 	required = false,
-	disabled = false,
+	onValueChange,
 }: Props<T>) => {
 	return (
 		<FormField
 			control={control}
 			name={name}
 			render={({ field }) => (
-				<FormItem className='flex-1'>
+				<FormItem>
 					<FormLabel>
 						{label} {required && <span className='text-destructive'>*</span>}
 					</FormLabel>
 					<Select
 						onValueChange={(value) => {
-							if (forForm === 'create user') {
-								const selectedItem = items?.find((item) => item.id === value);
-								field.onChange(selectedItem);
-							} else {
-								field.onChange(value);
-							}
+							field.onChange(value);
+							onValueChange?.(value, name);
 						}}
-						value={forForm === 'create user' ? field.value?.id : field.value}
-						disabled={disabled}
+						value={field.value}
 					>
 						<FormControl>
 							<SelectTrigger className={className}>
@@ -70,16 +64,14 @@ const SelectFormCustom = <T extends FieldValues>({
 							</SelectTrigger>
 						</FormControl>
 						<SelectContent>
-							{items &&
-								items.length > 0 &&
-								items.map((item) => (
-									<SelectItem
-										key={item.id}
-										value={item.id}
-									>
-										{item.name}
-									</SelectItem>
-								))}
+							{items?.map((item) => (
+								<SelectItem
+									key={item.id}
+									value={item.name}
+								>
+									{item.name}
+								</SelectItem>
+							))}
 						</SelectContent>
 					</Select>
 					<FormMessage />

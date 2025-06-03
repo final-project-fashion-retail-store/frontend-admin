@@ -1,5 +1,5 @@
 export type AddressSendType = {
-	user?: string;
+	email?: string;
 	fullName?: string;
 	phoneNumber?: string;
 	addressLine?: string;
@@ -8,4 +8,5 @@ export type AddressSendType = {
 	ward?: string;
 	label?: 'Home' | 'Work' | 'Other';
 	active?: boolean;
+	isDefault?: boolean;
 };

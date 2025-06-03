@@ -70,7 +70,9 @@ const UpdatePasswordForm = () => {
 
 	async function onSubmit(values: z.infer<typeof formSchema>) {
 		if (isChangingPassword) return;
-		const errMessage = await changePassword(values);
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const { username, ...accurateData } = values;
+		const errMessage = await changePassword(accurateData);
 
 		if (errMessage) {
 			form.setError('oldPassword', {

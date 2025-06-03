@@ -63,7 +63,6 @@ const useGeneralStore = create<Store>((set) => ({
 			if (err instanceof AxiosError) {
 				console.log(err);
 				console.log(err?.response?.data?.message);
-				throw err;
 			}
 		} finally {
 			set({ isDestroyingImages: false });

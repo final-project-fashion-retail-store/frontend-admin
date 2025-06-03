@@ -17,8 +17,8 @@ import Profile from '@/pages/Profile/Profile';
 import Appearance from '@/pages/Appearance/Appearance';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import CustomerManagement from '@/pages/CustomerManagement/CustomerManagement';
-import StaffManagement from '@/pages/StaffManagement';
 import AddressManagement from '@/pages/AddressManagement/AddressManagement';
+import StaffManagement from '@/pages/StaffManagement/StaffManagement';
 
 const App = () => {
 	const [checkAuth, isCheckingAuth, authUser] = useAuthStore(

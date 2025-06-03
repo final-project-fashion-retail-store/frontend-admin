@@ -30,11 +30,11 @@ import {
 } from '@/components/ui/sidebar';
 import { useAuthStore } from '@/store';
 import {
-	Calendar03Icon,
-	Home02Icon,
-	MessengerIcon,
-	SearchAreaIcon,
-	Settings02Icon,
+	// Calendar03Icon,
+	// Home02Icon,
+	// MessengerIcon,
+	// SearchAreaIcon,
+	// Settings02Icon,
 	UnfoldMoreIcon,
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
@@ -51,33 +51,33 @@ import { Link } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 
 // Menu items.
-const items = [
-	{
-		title: 'Home',
-		url: '#',
-		icon: Home02Icon,
-	},
-	{
-		title: 'Inbox',
-		url: '#',
-		icon: MessengerIcon,
-	},
-	{
-		title: 'Calendar',
-		url: '#',
-		icon: Calendar03Icon,
-	},
-	{
-		title: 'Search',
-		url: '#',
-		icon: SearchAreaIcon,
-	},
-	{
-		title: 'Settings',
-		url: '#',
-		icon: Settings02Icon,
-	},
-];
+// const items = [
+// 	{
+// 		title: 'Home',
+// 		url: '#',
+// 		icon: Home02Icon,
+// 	},
+// 	{
+// 		title: 'Inbox',
+// 		url: '#',
+// 		icon: MessengerIcon,
+// 	},
+// 	{
+// 		title: 'Calendar',
+// 		url: '#',
+// 		icon: Calendar03Icon,
+// 	},
+// 	{
+// 		title: 'Search',
+// 		url: '#',
+// 		icon: SearchAreaIcon,
+// 	},
+// 	{
+// 		title: 'Settings',
+// 		url: '#',
+// 		icon: Settings02Icon,
+// 	},
+// ];
 
 export function AppSidebar() {
 	const [authUser, isLoggingOut, logout] = useAuthStore(
@@ -119,12 +119,9 @@ export function AppSidebar() {
 							</SidebarMenuItem>
 							<SidebarMenuItem>
 								{/* User management */}
-								<Collapsible
-									defaultOpen
-									className='group/collapsible'
-								>
+								<Collapsible className='group/collapsible'>
 									<CollapsibleTrigger asChild>
-										<SidebarMenuButton>
+										<SidebarMenuButton disabled={authUser?.role === 'staff'}>
 											<Users />
 											<span>User Management</span>
 											<ChevronDown className='ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180' />

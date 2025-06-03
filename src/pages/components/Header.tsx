@@ -6,8 +6,10 @@ type Props = {
 const Header = ({ title, description }: Props) => {
 	return (
 		<div className='w-full'>
-			<h1 className='font-black text-2xl'>{title}</h1>
-			<p className='text-muted-foreground text-base'>{description}</p>
+			<h1 className='font-black text-2xl max-md:text-lg'>{title}</h1>
+			<p className='text-muted-foreground text-base max-md:text-sm'>
+				{description}
+			</p>
 		</div>
 	);
 };

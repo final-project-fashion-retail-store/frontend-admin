@@ -148,7 +148,7 @@ const Login = () => {
 								/>
 
 								<Button
-									className='cursor-pointer w-full bg-foreground'
+									className='cursor-pointer w-full'
 									type='submit'
 									size={'lg'}
 									disabled={isLoggingIn}

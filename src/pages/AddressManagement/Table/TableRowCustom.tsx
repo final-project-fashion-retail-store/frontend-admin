@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { useShallow } from 'zustand/react/shallow';
 import { useManagementStore } from '@/store';
 import AlertDialogCustom from '@/components/AlertDialogCustom';
+import DialogCustom from '@/components/DialogCustom';
 
 type Props = {
 	index: number;
@@ -23,6 +24,10 @@ type Props = {
 	active: boolean | '';
 	sort: string;
 	paginationLink: string;
+	dialogClassName: string;
+	dialogTitle: string;
+	dialogDescription: string;
+	form: React.ReactNode;
 };
 
 const TableRowCustom = ({
@@ -32,22 +37,30 @@ const TableRowCustom = ({
 	active,
 	sort,
 	paginationLink,
+	dialogClassName,
+	dialogTitle,
+	dialogDescription,
+	form,
 }: Props) => {
-	const [updateAddress, deleteAddress, getAllAddresses] = useManagementStore(
-		useShallow((state) => [
-			state.updateAddress,
-			state.deleteAddress,
-			state.getAllAddresses,
-		])
-	);
+	const [updateAddress, deleteAddress, getAllAddresses, setSelectedAddress] =
+		useManagementStore(
+			useShallow((state) => [
+				state.updateAddress,
+				state.deleteAddress,
+				state.getAllAddresses,
+				state.setSelectedAddress,
+			])
+		);
 
-	const handleClickAction = (action: string) => {
+	const handleClickAction = async (action: string) => {
 		if (action === 'activate' || action === 'deactivate') {
-			updateAddress(data?._id, { active: action === 'activate' ? true : false });
-			getAllAddresses(searchValue, active, sort, paginationLink);
+			await updateAddress(data?._id, {
+				active: action === 'activate' ? true : false,
+			});
+			await getAllAddresses(searchValue, active, sort, paginationLink);
 		} else if (action === 'delete') {
-			deleteAddress(data?._id);
-			getAllAddresses(searchValue, active, sort, paginationLink);
+			await deleteAddress(data?._id);
+			await getAllAddresses(searchValue, active, sort, paginationLink);
 		}
 	};
 
@@ -55,9 +68,7 @@ const TableRowCustom = ({
 		<Fragment>
 			<TableRow>
 				<TableCell className='font-medium'>{index + 1}</TableCell>
-				<TableCell>
-					{(typeof data.user === 'object' && data.user.email) || 'None'}
-				</TableCell>
+				<TableCell>{data.user.email || 'None'}</TableCell>
 				<TableCell>{data.fullName || 'None'}</TableCell>
 				<TableCell className='text-center'>{data.phoneNumber || 'None'}</TableCell>
 				<TableCell className='text-center'>{data.addressLine || 'None'}</TableCell>
@@ -70,7 +81,7 @@ const TableRowCustom = ({
 				<TableCell className='text-center'>{data.label || 'None'}</TableCell>
 				<TableCell>{data.formattedAddress || 'None'}</TableCell>
 				<TableCell className='text-center'>
-					<Badge className={`${data.active ? 'bg-primary' : 'bg-destructive'}`}>
+					<Badge className={`${data.active ? 'bg-emerald-500' : 'bg-destructive'}`}>
 						{data.active ? 'Active' : 'Inactive'}
 					</Badge>
 				</TableCell>
@@ -86,7 +97,19 @@ const TableRowCustom = ({
 						<DropdownMenuContent>
 							<DropdownMenuLabel>Action</DropdownMenuLabel>
 							<DropdownMenuSeparator />
-							<DropdownMenuItem>Edit</DropdownMenuItem>
+							<DialogCustom
+								className={dialogClassName}
+								title={dialogTitle}
+								description={dialogDescription}
+								form={form}
+							>
+								<DropdownMenuItem
+									onSelect={(e) => e.preventDefault()}
+									onClick={() => setSelectedAddress(data)}
+								>
+									Edit
+								</DropdownMenuItem>
+							</DialogCustom>
 							<AlertDialogCustom
 								title={`Are you sure you want to ${
 									data?.active ? 'deactivate' : 'activate'
