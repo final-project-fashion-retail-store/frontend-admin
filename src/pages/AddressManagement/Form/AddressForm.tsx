@@ -12,7 +12,7 @@ import {
 	FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useGeneralStore, useManagementStore } from '@/store';
+import { useGeneralStore, useUserManagementStore } from '@/store';
 import { useShallow } from 'zustand/react/shallow';
 import SelectFormCustom from '@/components/SelectFormCustom';
 import { useEffect, useRef, useState } from 'react';
@@ -73,7 +73,7 @@ const AddressForm = () => {
 		updateAddress,
 		selectedAddress,
 		getAllAddresses,
-	] = useManagementStore(
+	] = useUserManagementStore(
 		useShallow((state) => [
 			state.isCreatingAddress,
 			state.isUpdatingAddress,
@@ -182,10 +182,10 @@ const AddressForm = () => {
 			return;
 		}
 
-		await getAllAddresses();
 		if (closeBtnRef.current) {
 			closeBtnRef.current.click();
 		}
+		await getAllAddresses();
 	}
 
 	return (
@@ -278,6 +278,7 @@ const AddressForm = () => {
 									label='City'
 									placeholder='Select City'
 									items={provinces}
+									passToValue='name'
 									onValueChange={handleChangeSelect}
 									required
 								/>
@@ -290,6 +291,7 @@ const AddressForm = () => {
 									label='District'
 									placeholder='Select District'
 									items={districts}
+									passToValue='name'
 									onValueChange={handleChangeSelect}
 									required
 								/>
@@ -304,6 +306,7 @@ const AddressForm = () => {
 									label='Ward'
 									placeholder='Select Ward'
 									items={wards}
+									passToValue='name'
 									onValueChange={handleChangeSelect}
 									required
 								/>
@@ -368,8 +371,10 @@ const AddressForm = () => {
 							icon={Orbit01Icon}
 							className='animate-spin'
 						/>
+					) : selectedAddress ? (
+						'Save change'
 					) : (
-						'Save changes'
+						'Create'
 					)}
 				</Button>
 			</DialogFooter>

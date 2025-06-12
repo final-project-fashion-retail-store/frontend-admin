@@ -41,8 +41,11 @@ import { HugeiconsIcon } from '@hugeicons/react';
 import {
 	ChevronDown,
 	House,
+	ListTodo,
+	ListTree,
 	LocationEdit,
 	LogOut,
+	Sparkles,
 	UserCheck,
 	UserRoundCog,
 	Users,
@@ -50,34 +53,62 @@ import {
 import { Link } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 
-// Menu items.
-// const items = [
-// 	{
-// 		title: 'Home',
-// 		url: '#',
-// 		icon: Home02Icon,
-// 	},
-// 	{
-// 		title: 'Inbox',
-// 		url: '#',
-// 		icon: MessengerIcon,
-// 	},
-// 	{
-// 		title: 'Calendar',
-// 		url: '#',
-// 		icon: Calendar03Icon,
-// 	},
-// 	{
-// 		title: 'Search',
-// 		url: '#',
-// 		icon: SearchAreaIcon,
-// 	},
-// 	{
-// 		title: 'Settings',
-// 		url: '#',
-// 		icon: Settings02Icon,
-// 	},
-// ];
+const items = [
+	{
+		title: 'Dashboard',
+		url: 'dashboard',
+		icon: <House />,
+	},
+	{
+		title: 'User Management',
+		url: '#',
+		icon: <Users />,
+		dropdownItems: [
+			{
+				title: 'Customer',
+				url: 'manage-customers',
+				icon: <Users />,
+			},
+			{
+				title: 'Staff',
+				url: 'manage-employees',
+				icon: <UserCheck />,
+			},
+			{
+				title: 'Address',
+				url: 'manage-addresses',
+				icon: <LocationEdit />,
+			},
+		],
+	},
+	{
+		title: 'Product Management',
+		url: '#',
+		icon: <ListTodo />,
+		dropdownItems: [
+			{
+				title: 'Product',
+				url: 'manage-products',
+				icon: <ListTodo />,
+			},
+			{
+				title: 'Category',
+				url: 'manage-categories',
+				icon: <ListTree />,
+			},
+			{
+				title: 'Subcategory',
+				url: 'manage-subcategories',
+				icon: <ListTree />,
+			},
+			{
+				title: 'Brand',
+				url: 'manage-brands',
+				icon: <Sparkles />,
+			},
+		],
+	},
+];
 
 export function AppSidebar() {
 	const [authUser, isLoggingOut, logout] = useAuthStore(
@@ -109,54 +140,47 @@ export function AppSidebar() {
 				<SidebarGroup>
 					<SidebarGroupContent>
 						<SidebarMenu>
-							<SidebarMenuItem>
-								<SidebarMenuButton asChild>
-									<Link to={'dashboard'}>
-										<House />
-										<span>Dashboard</span>
-									</Link>
-								</SidebarMenuButton>
-							</SidebarMenuItem>
-							<SidebarMenuItem>
-								{/* User management */}
-								<Collapsible className='group/collapsible'>
-									<CollapsibleTrigger asChild>
-										<SidebarMenuButton disabled={authUser?.role === 'staff'}>
-											<Users />
-											<span>User Management</span>
-											<ChevronDown className='ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180' />
-										</SidebarMenuButton>
-									</CollapsibleTrigger>
-									<CollapsibleContent>
-										<SidebarMenuSub>
-											<SidebarMenuSubItem>
-												<SidebarMenuSubButton asChild>
-													<Link to={'manage-customers'}>
-														<Users />
-														<span>Customer</span>
-													</Link>
-												</SidebarMenuSubButton>
-											</SidebarMenuSubItem>
-											<SidebarMenuSubItem>
-												<SidebarMenuSubButton asChild>
-													<Link to={'manage-employees'}>
-														<UserCheck />
-														<span>Staff</span>
-													</Link>
-												</SidebarMenuSubButton>
-											</SidebarMenuSubItem>
-											<SidebarMenuSubItem>
-												<SidebarMenuSubButton asChild>
-													<Link to={'manage-addresses'}>
-														<LocationEdit />
-														<span>Address</span>
-													</Link>
-												</SidebarMenuSubButton>
-											</SidebarMenuSubItem>
-										</SidebarMenuSub>
-									</CollapsibleContent>
-								</Collapsible>
-							</SidebarMenuItem>
+							{items.map((item) => {
+								if (!item?.dropdownItems) {
+									return (
+										<SidebarMenuItem key={item.title}>
+											<SidebarMenuButton asChild>
+												<Link to={item.url}>
+													{item.icon}
+													<span>{item.title}</span>
+												</Link>
+											</SidebarMenuButton>
+										</SidebarMenuItem>
+									);
+								}
+								return (
+									<SidebarMenuItem key={item.title}>
+										<Collapsible className='group/collapsible'>
+											<CollapsibleTrigger asChild>
+												<SidebarMenuButton disabled={authUser?.role === 'staff'}>
+													{item.icon}
+													<span>{item.title}</span>
+													<ChevronDown className='ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180' />
+												</SidebarMenuButton>
+											</CollapsibleTrigger>
+											<CollapsibleContent>
+												<SidebarMenuSub>
+													{item.dropdownItems.map((dropdownItem) => (
+														<SidebarMenuSubItem key={dropdownItem.title}>
+															<SidebarMenuSubButton asChild>
+																<Link to={dropdownItem.url}>
+																	{dropdownItem.icon}
+																	<span>{dropdownItem.title}</span>
+																</Link>
+															</SidebarMenuSubButton>
+														</SidebarMenuSubItem>
+													))}
+												</SidebarMenuSub>
+											</CollapsibleContent>
+										</Collapsible>
+									</SidebarMenuItem>
+								);
+							})}
 						</SidebarMenu>
 					</SidebarGroupContent>
 				</SidebarGroup>

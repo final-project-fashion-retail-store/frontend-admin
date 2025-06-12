@@ -29,7 +29,8 @@ type Props<T extends FieldValues> = {
 	className?: string;
 	forForm?: 'create user' | '';
 	required?: boolean;
-	onValueChange?: (value: string, fieldName: string) => void;
+	passToValue?: 'id' | 'name';
+	onValueChange?: (value: string, fieldName: string, title?: string) => void;
 };
 
 const SelectFormCustom = <T extends FieldValues>({
@@ -40,6 +41,7 @@ const SelectFormCustom = <T extends FieldValues>({
 	items,
 	className,
 	required = false,
+	passToValue = 'id',
 	onValueChange,
 }: Props<T>) => {
 	return (
@@ -54,7 +56,8 @@ const SelectFormCustom = <T extends FieldValues>({
 					<Select
 						onValueChange={(value) => {
 							field.onChange(value);
-							onValueChange?.(value, name);
+							const title = items?.find((item) => item[passToValue] === value)?.name;
+							onValueChange?.(value, name, title);
 						}}
 						value={field.value}
 					>
@@ -67,7 +70,7 @@ const SelectFormCustom = <T extends FieldValues>({
 							{items?.map((item) => (
 								<SelectItem
 									key={item.id}
-									value={item.name}
+									value={item[passToValue]}
 								>
 									{item.name}
 								</SelectItem>

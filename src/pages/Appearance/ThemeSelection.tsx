@@ -30,7 +30,10 @@ const ThemeSelection = () => {
 			className='flex flex-row gap-2'
 		>
 			{themeOptions.map((option) => (
-				<div className='flex items-center space-x-2'>
+				<div
+					key={option.value}
+					className='flex items-center space-x-2'
+				>
 					<RadioGroupItem
 						value={option.value}
 						checked={theme === option.value}

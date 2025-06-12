@@ -1,9 +1,9 @@
 import useDebounce from '@/hooks/use-debounce';
 import Header from '@/pages/components/Header';
-import Filter from '@/pages/components/User/Filter';
+import Filter from '@/pages/components/Filter';
 import TableCustom from '@/pages/components/TableCustom';
 import TableRowCustom from '@/pages/AddressManagement/Table/TableRowCustom';
-import { useManagementStore } from '@/store';
+import { useUserManagementStore } from '@/store';
 import { useEffect, useRef, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import Pagination from '@/pages/components/Pagination';
@@ -13,6 +13,7 @@ import DialogCustom from '@/components/DialogCustom';
 import AddressForm from '@/pages/AddressManagement/Form/AddressForm';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import SelectCustom from '@/components/SelectCustom';
 
 type TableColumn<T> = {
 	key: keyof T;
@@ -35,6 +36,21 @@ const addressColumns: TableColumn<UserAddressType>[] = [
 	{ key: 'active', label: 'Active' },
 ];
 
+const filterSelectItems = [
+	{
+		title: 'All Status',
+		value: 'all',
+	},
+	{
+		title: 'Active',
+		value: 'active',
+	},
+	{
+		title: 'Inactive',
+		value: 'inactive',
+	},
+];
+
 const AddressManagement = () => {
 	const [
 		addresses,
@@ -43,7 +59,9 @@ const AddressManagement = () => {
 		isDeletingAddress,
 		isGettingAddress,
 		getAllAddresses,
-	] = useManagementStore(
+		setSelectedAddress,
+		pagination,
+	] = useUserManagementStore(
 		useShallow((state) => [
 			state.addresses,
 			state.isCreatingAddress,
@@ -51,6 +69,8 @@ const AddressManagement = () => {
 			state.isDeletingAddress,
 			state.isGettingAddress,
 			state.getAllAddresses,
+			state.setSelectedAddress,
+			state.pagination,
 		])
 	);
 
@@ -132,9 +152,16 @@ const AddressManagement = () => {
 					<Filter
 						placeHolderSearch='Search user id, name, phone, city, district, etc'
 						searchValue={searchValue}
-						activeStatus={activeStatus}
 						handleSearch={handleSearch}
-						handleSelectStatus={handleSelectStatus}
+						SelectStatus={
+							<SelectCustom
+								className='w-[140px]'
+								triggerPlaceHolder='Status'
+								items={filterSelectItems}
+								defaultValue={activeStatus}
+								onValueChange={handleSelectStatus}
+							/>
+						}
 						formDialog={
 							<DialogCustom
 								className='sm:max-w-[700px]'
@@ -146,6 +173,7 @@ const AddressManagement = () => {
 								<Button
 									variant={'outline'}
 									className='size-10 rounded-sm'
+									onClick={() => setSelectedAddress(null)}
 								>
 									<Plus className='size-6' />
 								</Button>
@@ -177,9 +205,10 @@ const AddressManagement = () => {
 						)}
 					/>
 					{/* Pagination */}
-					{!isGettingAddress && (
+					{!isGettingAddress && pagination && (
 						<Pagination
 							page='address(es)'
+							pagination={pagination}
 							handleClickPagination={handleClickPagination}
 						/>
 					)}

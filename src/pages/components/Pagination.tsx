@@ -1,15 +1,14 @@
 import { Button } from '@/components/ui/button';
-import { useManagementStore } from '@/store';
+import type { PaginationType } from '@/types';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 type Props = {
 	page?: string;
+	pagination: PaginationType;
 	handleClickPagination: (paginationLink: string) => void;
 };
 
-const Pagination = ({ page, handleClickPagination }: Props) => {
-	const pagination = useManagementStore((state) => state.pagination);
-
+const Pagination = ({ page, pagination, handleClickPagination }: Props) => {
 	return (
 		<div className='w-full flex flex-row items-center justify-between'>
 			<span className='text-muted-foreground text-sm'>

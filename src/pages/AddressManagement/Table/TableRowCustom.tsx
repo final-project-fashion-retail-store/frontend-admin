@@ -13,7 +13,7 @@ import { MoreHorizontal } from 'lucide-react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useShallow } from 'zustand/react/shallow';
-import { useManagementStore } from '@/store';
+import { useUserManagementStore } from '@/store';
 import AlertDialogCustom from '@/components/AlertDialogCustom';
 import DialogCustom from '@/components/DialogCustom';
 
@@ -43,7 +43,7 @@ const TableRowCustom = ({
 	form,
 }: Props) => {
 	const [updateAddress, deleteAddress, getAllAddresses, setSelectedAddress] =
-		useManagementStore(
+		useUserManagementStore(
 			useShallow((state) => [
 				state.updateAddress,
 				state.deleteAddress,

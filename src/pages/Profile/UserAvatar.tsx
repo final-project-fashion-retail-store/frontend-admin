@@ -6,7 +6,7 @@ import { useAuthStore } from '@/store';
 import { useShallow } from 'zustand/react/shallow';
 import { toast } from 'sonner';
 import { useGeneralStore } from '@/store';
-import { AxiosError } from 'axios';
+import { useEffect } from 'react';
 
 const UserAvatar = () => {
 	const [authUser, updateProfile, isUpdatingProfile] = useAuthStore(
@@ -16,15 +16,32 @@ const UserAvatar = () => {
 			state.isUpdatingProfile,
 		])
 	);
-	const [isUploadingImages, uploadImages, isDestroyingImages, destroyImages] =
-		useGeneralStore(
-			useShallow((state) => [
-				state.isUploadingImages,
-				state.uploadImages,
-				state.isDestroyingImages,
-				state.destroyImages,
-			])
-		);
+	const [
+		isUploadingImages,
+		uploadImages,
+		isDestroyingImages,
+		destroyImages,
+		uploadedImages,
+	] = useGeneralStore(
+		useShallow((state) => [
+			state.isUploadingImages,
+			state.uploadImages,
+			state.isDestroyingImages,
+			state.destroyImages,
+			state.uploadedImages,
+		])
+	);
+
+	useEffect(() => {
+		if (uploadedImages && uploadedImages.length > 0) {
+			const newAvatarData = {
+				url: uploadedImages[0].secure_url,
+				public_id: uploadedImages[0].public_id,
+			};
+
+			updateProfile({ avatar: newAvatarData });
+		}
+	}, [uploadedImages, updateProfile]);
 
 	const handleUploadAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target?.files?.[0];
@@ -33,7 +50,7 @@ const UserAvatar = () => {
 			toast.error('Please select an image file');
 			return;
 		}
-		if (file.size > 50 * 1024 * 1024) {
+		if (file.size > 5 * 1024 * 1024) {
 			toast.error('File size exceeds 5MB');
 			return;
 		}
@@ -41,29 +58,17 @@ const UserAvatar = () => {
 		const formData = new FormData();
 		formData.append('images', file);
 
-		try {
-			// Destroy previous image first
+		// Destroy previous image first
+		if (authUser?.avatar?.public_id) {
 			await destroyImages({ publicId: [authUser?.avatar?.public_id || ''] });
-
-			// Then upload new image
-			const res = await uploadImages(formData);
-			if (res && !Array.isArray(res)) {
-				updateProfile({
-					avatar: { url: res.secure_url, public_id: res.public_id },
-				});
-			}
-		} catch (err) {
-			if (err instanceof AxiosError) {
-				toast.error('Failed to upload avatar');
-				console.log(err);
-				console.log(err?.response?.data?.message);
-			}
 		}
+		// Then upload new image
+		await uploadImages(formData);
 	};
 
 	return (
 		<label htmlFor='avatar'>
-			<div className='size-18 max-md:size-14 cursor-pointer relative group'>
+			<div className='size-20 max-md:size-14 cursor-pointer relative group p-1 max-md:p-0'>
 				<Avatar
 					className={`size-full ring ring-foreground ${
 						(isUpdatingProfile || isUploadingImages || isDestroyingImages) &&

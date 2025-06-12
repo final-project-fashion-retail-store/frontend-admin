@@ -52,7 +52,7 @@ type Store = {
 	createUser: (data: UserSendType) => Promise<string | void>;
 	updateUser: (id: string, data: UserSendType) => Promise<string | void>;
 	deleteUser: (user: UserType) => void;
-	setSelectedUser: (user: UserType) => void;
+	setSelectedUser: (user: UserType | null) => void;
 
 	// address function
 	getAllAddresses: (
@@ -65,10 +65,10 @@ type Store = {
 	createAddress: (data: AddressSendType) => Promise<void | string>;
 	updateAddress: (id: string, data: AddressSendType) => Promise<void | string>;
 	deleteAddress: (id: string) => void;
-	setSelectedAddress: (address: UserAddressType) => void;
+	setSelectedAddress: (address: UserAddressType | null) => void;
 };
 
-const useManagementStore = create<Store>((set, get) => ({
+const useUserManagementStore = create<Store>((set, get) => ({
 	pagination: null,
 
 	// user state
@@ -171,7 +171,9 @@ const useManagementStore = create<Store>((set, get) => ({
 
 			// Add image deletion if avatar exists
 			if (publicId) {
-				deletePromises.push(destroyImages({ publicId: [publicId] }));
+				deletePromises.push(
+					destroyImages({ publicId: [publicId] }).then(() => void 0)
+				);
 			}
 
 			// Execute all promises concurrently
@@ -233,9 +235,6 @@ const useManagementStore = create<Store>((set, get) => ({
 		try {
 			set({ isCreatingAddress: true });
 			await createAddress(data);
-
-			const { getAllAddresses } = get();
-			await getAllAddresses();
 			toast.success('Address created successfully');
 		} catch (err) {
 			if (err instanceof AxiosError) {
@@ -283,4 +282,4 @@ const useManagementStore = create<Store>((set, get) => ({
 	},
 }));
 
-export default useManagementStore;
+export default useUserManagementStore;

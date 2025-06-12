@@ -17,7 +17,8 @@ export const uploadImages = async (data: FormData) => {
 
 export const destroyImages = async (data: { publicId: string[] }) => {
 	try {
-		await instance.delete('/images', { data });
+		const res = await instance.delete('/images', { data });
+		return res;
 	} catch (err) {
 		if (isAxiosError(err)) throw err;
 	}

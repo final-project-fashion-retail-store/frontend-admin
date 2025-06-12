@@ -7,13 +7,14 @@ import Overlay from '@/components/ui/overlay';
 import useDebounce from '@/hooks/use-debounce';
 import Header from '@/pages/components/Header';
 import Pagination from '@/pages/components/Pagination';
-import Filter from '@/pages/components/User/Filter';
+import Filter from '@/pages/components/Filter';
 import type { UserType } from '@/types';
 import TableRowCustom from '@/pages/components/User/Table/TableRowCustom';
 import DialogCustom from '@/components/DialogCustom';
-import CreateUserForm from '@/pages/components/User/Form/UserForm';
+import UserForm from '@/pages/components/User/Form/UserForm';
 import { Button } from '@/components/ui/button';
-import { useGeneralStore, useManagementStore } from '@/store';
+import { useGeneralStore, useUserManagementStore } from '@/store';
+import SelectCustom from '@/components/SelectCustom';
 
 type TableColumn<T> = {
 	key: keyof T;
@@ -30,15 +31,43 @@ const userColumns: TableColumn<UserType>[] = [
 	{ key: 'active', label: 'Status' },
 ];
 
+const filterSelectItems = [
+	{
+		title: 'All Status',
+		value: 'all',
+	},
+	{
+		title: 'Active',
+		value: 'active',
+	},
+	{
+		title: 'Inactive',
+		value: 'inactive',
+	},
+];
+
 const CustomerManagement = () => {
-	const [users, isGettingUser, isUpdatingUser, getAllUsers] = useManagementStore(
+	const [
+		users,
+		isGettingUser,
+		isUpdatingUser,
+		getAllUsers,
+		setSelectedUser,
+		pagination,
+	] = useUserManagementStore(
 		useShallow((state) => [
 			state.users,
 			state.isGettingUser,
 			state.isUpdatingUser,
 			state.getAllUsers,
+			state.setSelectedUser,
+			state.pagination,
 		])
 	);
+	const [uploadedImages, resetStates] = useGeneralStore(
+		useShallow((state) => [state.uploadedImages, state.resetStates])
+	);
+
 	const [sortName, setSortName] = useState<'asc' | 'desc' | ''>('');
 	const [sortEmail, setSortEmail] = useState<'asc' | 'desc' | ''>('');
 	const [activeStatus, setActiveStatus] = useState<string>('all');
@@ -46,9 +75,6 @@ const CustomerManagement = () => {
 	const [paginationLink, setPaginationLink] = useState<string>('');
 	const [isCreatedCustomer, setIsCreatedCustomer] = useState(false);
 	const destroyImages = useGeneralStore((state) => state.destroyImages);
-	const [imageId, setImageId] = useState<{ publicId: string[] }>({
-		publicId: [''],
-	});
 	const debounceValue = useDebounce(searchValue, 1000);
 
 	const currentSort = useRef<string>('');
@@ -102,15 +128,12 @@ const CustomerManagement = () => {
 		getAllUsers('user', '', '', '', paginationLink);
 	};
 
-	const getImageAvatarId = (public_id: string) => {
-		setImageId({ publicId: [public_id] });
-	};
-
 	// handle when dialog closes
 	const handleOpenChange = (isOpen: boolean) => {
-		if (!isOpen && imageId.publicId[0] && !isCreatedCustomer) {
-			destroyImages(imageId);
+		if (!isOpen && uploadedImages?.[0] && !isCreatedCustomer) {
+			destroyImages({ publicId: [uploadedImages[0].public_id] });
 		}
+		resetStates();
 	};
 
 	return (
@@ -127,18 +150,24 @@ const CustomerManagement = () => {
 					<Filter
 						placeHolderSearch='Search name, email, phone'
 						searchValue={searchValue}
-						activeStatus={activeStatus}
+						SelectStatus={
+							<SelectCustom
+								className='w-[140px]'
+								triggerPlaceHolder='Status'
+								items={filterSelectItems}
+								defaultValue={activeStatus}
+								onValueChange={handleSelectStatus}
+							/>
+						}
 						handleSearch={handleSearch}
-						handleSelectStatus={handleSelectStatus}
 						formDialog={
 							<DialogCustom
 								className='sm:max-w-[700px]'
 								title='Create'
 								description='Create a new customer'
 								form={
-									<CreateUserForm
+									<UserForm
 										role='user'
-										getImageAvatarId={getImageAvatarId}
 										setIsCreatedUser={setIsCreatedCustomer}
 									/>
 								}
@@ -147,6 +176,7 @@ const CustomerManagement = () => {
 								<Button
 									variant={'outline'}
 									className='size-10 rounded-sm'
+									onClick={() => setSelectedUser(null)}
 								>
 									<Plus className='size-6' />
 								</Button>
@@ -172,9 +202,9 @@ const CustomerManagement = () => {
 								sort={currentSort.current}
 								paginationLink={paginationLink}
 								dialogTitle='Edit'
-								dialogDescription='Edit staff'
+								dialogDescription='Edit customer'
 								form={
-									<CreateUserForm
+									<UserForm
 										role='user'
 										setIsCreatedUser={setIsCreatedCustomer}
 									/>
@@ -184,9 +214,10 @@ const CustomerManagement = () => {
 						)}
 					/>
 					{/* Pagination */}
-					{!isGettingUser && (
+					{!isGettingUser && pagination && (
 						<Pagination
 							page='customer(s)'
+							pagination={pagination}
 							handleClickPagination={handleClickPagination}
 						/>
 					)}

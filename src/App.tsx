@@ -19,6 +19,11 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import CustomerManagement from '@/pages/CustomerManagement/CustomerManagement';
 import AddressManagement from '@/pages/AddressManagement/AddressManagement';
 import StaffManagement from '@/pages/StaffManagement/StaffManagement';
+import CategoryManagement from '@/pages/CategoryManagement/CategoryManagement';
+import SubcategoryManagement from '@/pages/SubcategoryManagement/SubcategoryManagement';
+import BrandManagement from '@/pages/BrandManagement/BrandManagement';
+import ProductManagement from '@/pages/ProductManagement/ProductManagement';
+import ProductForm from '@/pages/ProductManagement/Form/ProductFormContainer';
 
 const App = () => {
 	const [checkAuth, isCheckingAuth, authUser] = useAuthStore(
@@ -75,6 +80,43 @@ const App = () => {
 						<Route
 							path='manage-addresses'
 							element={<AddressManagement />}
+						/>
+						<Route
+							path='manage-products'
+							element={<ProductManagement />}
+						>
+							<Route
+								path='create'
+								element={
+									<ProductForm
+										title='Add New Product'
+										description='Create a new product with variants and specifications'
+										buttonTitle='Create Product'
+									/>
+								}
+							/>
+							<Route
+								path=':slug/edit'
+								element={
+									<ProductForm
+										title='Edit Product'
+										description='Update product information, variants, and specifications'
+										buttonTitle='Update Product'
+									/>
+								}
+							/>
+						</Route>
+						<Route
+							path='manage-categories'
+							element={<CategoryManagement />}
+						/>
+						<Route
+							path='manage-subcategories'
+							element={<SubcategoryManagement />}
+						/>
+						<Route
+							path='manage-brands'
+							element={<BrandManagement />}
 						/>
 						<Route />
 					</Route>

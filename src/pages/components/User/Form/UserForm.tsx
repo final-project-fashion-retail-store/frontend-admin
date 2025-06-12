@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -15,12 +15,13 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Upload, User } from 'lucide-react';
-import { useGeneralStore, useManagementStore } from '@/store';
+import { useGeneralStore, useUserManagementStore } from '@/store';
 import { useShallow } from 'zustand/react/shallow';
 import { DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import Overlay from '@/components/ui/overlay';
-import { AxiosError } from 'axios';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Orbit01Icon } from '@hugeicons/core-free-icons';
 
 const formSchema = z.object({
 	firstName: z.string().min(1, {
@@ -48,9 +49,8 @@ const formSchema = z.object({
 type Props = {
 	role: 'user' | 'staff';
 	setIsCreatedUser?: Dispatch<SetStateAction<boolean>>;
-	getImageAvatarId?: (public_url: string) => void;
 };
-const UserForm = ({ role, setIsCreatedUser, getImageAvatarId }: Props) => {
+const UserForm = ({ role, setIsCreatedUser }: Props) => {
 	const [
 		isCreatingUser,
 		isUpdatingUser,
@@ -58,7 +58,7 @@ const UserForm = ({ role, setIsCreatedUser, getImageAvatarId }: Props) => {
 		updateUser,
 		getAllUsers,
 		selectedUser,
-	] = useManagementStore(
+	] = useUserManagementStore(
 		useShallow((state) => [
 			state.isCreatingUser,
 			state.isUpdatingUser,
@@ -68,25 +68,20 @@ const UserForm = ({ role, setIsCreatedUser, getImageAvatarId }: Props) => {
 			state.selectedUser,
 		])
 	);
-	const [isUploadingImages, isDestroyingImages, uploadImages, destroyImages] =
-		useGeneralStore(
-			useShallow((state) => [
-				state.isUploadingImages,
-				state.isDestroyingImages,
-				state.uploadImages,
-				state.destroyImages,
-			])
-		);
-	const [imageUploaded, setImageUploaded] = useState<{
-		secure_url: string;
-		public_id: string;
-	}>(
-		selectedUser
-			? {
-					secure_url: selectedUser?.avatar.url,
-					public_id: selectedUser?.avatar.public_id,
-			  }
-			: { secure_url: '', public_id: '' }
+	const [
+		isUploadingImages,
+		isDestroyingImages,
+		uploadImages,
+		destroyImages,
+		uploadedImages,
+	] = useGeneralStore(
+		useShallow((state) => [
+			state.isUploadingImages,
+			state.isDestroyingImages,
+			state.uploadImages,
+			state.destroyImages,
+			state.uploadedImages,
+		])
 	);
 
 	const submitBtnRef = useRef<HTMLButtonElement>(null);
@@ -124,8 +119,8 @@ const UserForm = ({ role, setIsCreatedUser, getImageAvatarId }: Props) => {
 			...values,
 			role,
 			avatar: {
-				url: imageUploaded.secure_url,
-				public_id: imageUploaded.public_id,
+				url: uploadedImages?.[0].secure_url || '',
+				public_id: uploadedImages?.[0].public_id || '',
 			},
 		};
 
@@ -145,14 +140,14 @@ const UserForm = ({ role, setIsCreatedUser, getImageAvatarId }: Props) => {
 			return;
 		}
 
-		await getAllUsers(role);
-
 		setIsCreatedUser?.(true);
 
 		// Close dialog when success
 		if (closeBtnRef.current) {
 			closeBtnRef.current.click();
 		}
+
+		await getAllUsers(role);
 	}
 
 	const handleUploadAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -171,27 +166,11 @@ const UserForm = ({ role, setIsCreatedUser, getImageAvatarId }: Props) => {
 		const formData = new FormData();
 		formData.append('images', file);
 
-		try {
-			// Destroy image first If any (update case)
-			if (imageUploaded.public_id) {
-				await destroyImages({ publicId: [imageUploaded.public_id] });
-			}
-
-			// Then upload new image
-			const res = await uploadImages(formData);
-			if (res && !Array.isArray(res)) {
-				setImageUploaded(res);
-				if (getImageAvatarId && res.public_id) {
-					getImageAvatarId(res.public_id || '');
-				}
-			}
-		} catch (err) {
-			if (err instanceof AxiosError) {
-				toast.error('Failed to upload avatar');
-				console.log(err);
-				console.log(err?.response?.data?.message);
-			}
+		if (uploadedImages?.[0].public_id) {
+			await destroyImages({ publicId: [uploadedImages?.[0].public_id] });
 		}
+
+		await uploadImages(formData);
 	};
 
 	return (
@@ -205,11 +184,11 @@ const UserForm = ({ role, setIsCreatedUser, getImageAvatarId }: Props) => {
 					>
 						{/* upload avatar */}
 						<div className='w-full flex flex-col items-center space-y-4'>
-							{imageUploaded.public_id ? (
+							{uploadedImages?.[0].public_id ? (
 								<div className='size-20 max-size-20 rounded-full'>
 									<img
 										className='object-cover size-full rounded-full'
-										src={imageUploaded?.secure_url}
+										src={uploadedImages?.[0]?.secure_url}
 										alt='avatar-preview'
 									/>
 								</div>
@@ -346,7 +325,16 @@ const UserForm = ({ role, setIsCreatedUser, getImageAvatarId }: Props) => {
 						}
 					}}
 				>
-					Create
+					{isCreatingUser || isUpdatingUser ? (
+						<HugeiconsIcon
+							icon={Orbit01Icon}
+							className='animate-spin'
+						/>
+					) : selectedUser ? (
+						'Save change'
+					) : (
+						'Create'
+					)}
 				</Button>
 			</DialogFooter>
 		</>

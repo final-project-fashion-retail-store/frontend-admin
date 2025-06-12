@@ -14,7 +14,7 @@ import { TableCell, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useShallow } from 'zustand/react/shallow';
-import { useManagementStore } from '@/store';
+import { useGeneralStore, useUserManagementStore } from '@/store';
 import AlertDialogCustom from '@/components/AlertDialogCustom';
 import DialogCustom from '@/components/DialogCustom';
 
@@ -45,7 +45,7 @@ const TableRowCustom = ({
 	form,
 }: Props) => {
 	const [updateUser, deleteUser, getAllUser, setSelectedUser] =
-		useManagementStore(
+		useUserManagementStore(
 			useShallow((state) => [
 				state.updateUser,
 				state.deleteUser,
@@ -53,6 +53,7 @@ const TableRowCustom = ({
 				state.setSelectedUser,
 			])
 		);
+	const setUploadedImages = useGeneralStore((state) => state.setUploadedImages);
 
 	const [expandedRows, setExpandedRows] = useState<string[]>([]);
 
@@ -144,7 +145,12 @@ const TableRowCustom = ({
 							>
 								<DropdownMenuItem
 									onSelect={(e) => e.preventDefault()}
-									onClick={() => setSelectedUser(data)}
+									onClick={() => {
+										setSelectedUser(data);
+										setUploadedImages([
+											{ secure_url: data.avatar.url, public_id: data.avatar.public_id },
+										]);
+									}}
 								>
 									Edit
 								</DropdownMenuItem>

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { AxiosError } from 'axios';
+import { AxiosError, type AxiosResponse } from 'axios';
 
 import {
 	destroyImages,
@@ -9,30 +9,34 @@ import {
 	uploadImages,
 } from '@/services';
 import type { DistrictType, ProvinceType, WardType } from '@/types';
+import { toast } from 'sonner';
 
 type Store = {
 	provinces: ProvinceType[] | null;
 	districts: DistrictType[] | null;
 	wards: WardType[] | null;
+	uploadedImages: { public_id: string; secure_url: string }[] | null;
 	isUploadingImages: boolean;
 	isDestroyingImages: boolean;
 
-	uploadImages: (
-		data: FormData
-	) => Promise<
-		| { public_id: string; secure_url: string }
-		| { public_id: string; secure_url: string }[]
-	>;
-	destroyImages: (data: { publicId: string[] }) => Promise<void>;
+	uploadImages: (data: FormData) => void;
+	destroyImages: (data: {
+		publicId: string[];
+	}) => Promise<AxiosResponse | undefined>;
+	setUploadedImages: (
+		images: { secure_url: string; public_id: string }[]
+	) => void;
 	getProvinces: () => void;
 	getDistricts: (provinceId: string) => void;
 	getWards: (districtId: string) => void;
+	resetStates: () => void;
 };
 
 const useGeneralStore = create<Store>((set) => ({
 	provinces: null,
 	districts: null,
 	wards: null,
+	uploadedImages: null,
 	isUploadingImages: false,
 	isDestroyingImages: false,
 
@@ -40,14 +44,16 @@ const useGeneralStore = create<Store>((set) => ({
 		try {
 			set({ isUploadingImages: true });
 			const res = await uploadImages(data);
-			if (res) {
-				return res.data.images || res.data.image;
+			if (res.data.images) {
+				set({ uploadedImages: res.data.images });
+				return;
 			}
+			set({ uploadedImages: [res.data.image] });
 		} catch (err) {
 			if (err instanceof AxiosError) {
 				console.log(err);
 				console.log(err?.response?.data?.message);
-				throw err;
+				toast.error('Failed to upload images');
 			}
 		} finally {
 			set({ isUploadingImages: false });
@@ -103,6 +109,16 @@ const useGeneralStore = create<Store>((set) => ({
 				console.log(err?.response?.data?.message);
 			}
 		}
+	},
+
+	resetStates() {
+		set({
+			uploadedImages: null,
+		});
+	},
+
+	setUploadedImages(images) {
+		set({ uploadedImages: images });
 	},
 }));
 
