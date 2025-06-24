@@ -129,7 +129,7 @@ export const completelyDeleteAddresses = async (userId: string) => {
 // Product
 export const getProduct = async (slug: string) => {
 	try {
-		const res = await instance.get(`/products/${slug}`);
+		const res = await instance.get(`products/${slug}`);
 		return res.data;
 	} catch (err) {
 		if (isAxiosError(err)) throw err;
@@ -149,7 +149,7 @@ export const getAllProducts = async (
 	try {
 		const res = await instance.get(
 			paginationLink ||
-				`/products?productManageSearch=${searchValue}&active=${active}&inStock=${inStock}&featuredProduct=${featured}&category=${category}&brand=${brand}&sort=${sort}&limit=5`
+				`products?productManageSearch=${searchValue}&active=${active}&inStock=${inStock}&featuredProduct=${featured}&category=${category}&brand=${brand}&sort=${sort}&limit=5`
 		);
 		return res.data;
 	} catch (err) {
@@ -159,7 +159,7 @@ export const getAllProducts = async (
 
 export const createProduct = async (data: ProductSendType) => {
 	try {
-		const res = await instance.post('/products', data);
+		const res = await instance.post('products', data);
 		return res.data;
 	} catch (err) {
 		if (isAxiosError(err)) throw err;
@@ -168,7 +168,7 @@ export const createProduct = async (data: ProductSendType) => {
 
 export const updateProduct = async (id: string, data: ProductSendType) => {
 	try {
-		const res = await instance.patch(`/products/${id}`, data);
+		const res = await instance.patch(`products/${id}`, data);
 		return res.data;
 	} catch (err) {
 		if (isAxiosError(err)) throw err;
@@ -177,7 +177,7 @@ export const updateProduct = async (id: string, data: ProductSendType) => {
 
 export const deleteProduct = async (id: string) => {
 	try {
-		await instance.delete(`/products/${id}`);
+		await instance.delete(`products/${id}`);
 	} catch (err) {
 		if (isAxiosError(err)) throw err;
 	}
@@ -194,7 +194,7 @@ export const getAllCategories = async (
 	try {
 		const res = await instance.get(
 			paginationLink ||
-				`/categories?categoryManageSearch=${searchValue}&active=${active}&sort=${sort}&limit=${limit}`
+				`categories?categoryManageSearch=${searchValue}&active=${active}&sort=${sort}&limit=${limit}`
 		);
 		return res.data;
 	} catch (err) {
@@ -204,7 +204,7 @@ export const getAllCategories = async (
 
 export const createCategory = async (data: CategorySendType) => {
 	try {
-		const res = await instance.post('/categories', data);
+		const res = await instance.post('categories', data);
 		return res.data;
 	} catch (err) {
 		if (isAxiosError(err)) throw err;
@@ -213,7 +213,7 @@ export const createCategory = async (data: CategorySendType) => {
 
 export const updateCategory = async (id: string, data: CategorySendType) => {
 	try {
-		const res = await instance.patch(`/categories/${id}`, data);
+		const res = await instance.patch(`categories/${id}`, data);
 		return res.data;
 	} catch (err) {
 		if (isAxiosError(err)) throw err;
@@ -222,7 +222,7 @@ export const updateCategory = async (id: string, data: CategorySendType) => {
 
 export const deleteCategory = async (id: string) => {
 	try {
-		await instance.delete(`/categories/${id}`);
+		await instance.delete(`categories/${id}`);
 	} catch (err) {
 		if (isAxiosError(err)) throw err;
 	}
@@ -239,7 +239,7 @@ export const getAllSubcategories = async (
 	try {
 		const res = await instance.get(
 			paginationLink ||
-				`/subcategories?subcategoryManageSearch=${searchValue}&active=${active}&sort=${sort}&limit=${limit}`
+				`subcategories?subcategoryManageSearch=${searchValue}&active=${active}&sort=${sort}&limit=${limit}`
 		);
 		return res.data;
 	} catch (err) {
@@ -249,7 +249,7 @@ export const getAllSubcategories = async (
 
 export const createSubcategory = async (data: SubcategorySendType) => {
 	try {
-		const res = await instance.post('/subcategories', data);
+		const res = await instance.post('subcategories', data);
 		return res.data;
 	} catch (err) {
 		if (isAxiosError(err)) throw err;
@@ -261,7 +261,7 @@ export const updateSubcategory = async (
 	data: SubcategorySendType
 ) => {
 	try {
-		const res = await instance.patch(`/subcategories/${id}`, data);
+		const res = await instance.patch(`subcategories/${id}`, data);
 		return res.data;
 	} catch (err) {
 		if (isAxiosError(err)) throw err;
@@ -270,7 +270,7 @@ export const updateSubcategory = async (
 
 export const deleteSubcategory = async (id: string) => {
 	try {
-		await instance.delete(`/subcategories/${id}`);
+		await instance.delete(`subcategories/${id}`);
 	} catch (err) {
 		if (isAxiosError(err)) throw err;
 	}
@@ -288,7 +288,7 @@ export const getAllBrands = async (
 	try {
 		const res = await instance.get(
 			paginationLink ||
-				`/brands?brandManageSearch=${searchValue}&active=${active}&sort=${sort}&featuredBrand=${featured}&limit=${limit}`
+				`brands?brandManageSearch=${searchValue}&active=${active}&sort=${sort}&featuredBrand=${featured}&limit=${limit}`
 		);
 		return res.data;
 	} catch (err) {
@@ -298,7 +298,7 @@ export const getAllBrands = async (
 
 export const createBrands = async (data: BrandSendType) => {
 	try {
-		const res = await instance.post('/brands', data);
+		const res = await instance.post('brands', data);
 		return res.data;
 	} catch (err) {
 		if (isAxiosError(err)) throw err;
@@ -307,7 +307,7 @@ export const createBrands = async (data: BrandSendType) => {
 
 export const updateBrand = async (id: string, data: BrandSendType) => {
 	try {
-		const res = await instance.patch(`/brands/${id}`, data);
+		const res = await instance.patch(`brands/${id}`, data);
 		return res.data;
 	} catch (err) {
 		if (isAxiosError(err)) throw err;
@@ -316,7 +316,7 @@ export const updateBrand = async (id: string, data: BrandSendType) => {
 
 export const deleteBrand = async (id: string) => {
 	try {
-		await instance.delete(`/brands/${id}`);
+		await instance.delete(`brands/${id}`);
 	} catch (err) {
 		if (isAxiosError(err)) throw err;
 	}
@@ -324,7 +324,7 @@ export const deleteBrand = async (id: string) => {
 
 export const getBrandStats = async () => {
 	try {
-		const res = await instance.get('/brands/stats');
+		const res = await instance.get('brands/stats');
 		return res.data;
 	} catch (err) {
 		if (isAxiosError(err)) throw err;

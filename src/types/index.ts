@@ -17,6 +17,10 @@ export type { BrandType } from './BrandType';
 export type { BrandSendType } from './BrandSendType';
 export type { BrandStatType } from './BrandStatType';
 
+// Chat
+export type { MessageType } from './MessageType';
+export type { UserChatSidebarType } from './UserChatSidebarType';
+
 // Others
 export type { PaginationType } from './PaginationType';
 export type { ProvinceType } from './ProvinceType';

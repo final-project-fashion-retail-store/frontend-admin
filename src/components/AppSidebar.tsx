@@ -45,6 +45,7 @@ import {
 	ListTree,
 	LocationEdit,
 	LogOut,
+	MessageSquareText,
 	Sparkles,
 	UserCheck,
 	UserRoundCog,
@@ -108,6 +109,11 @@ const items = [
 			},
 		],
 	},
+	{
+		title: 'Messages',
+		url: 'messages',
+		icon: <MessageSquareText />,
+	},
 ];
 
 export function AppSidebar() {
@@ -121,7 +127,7 @@ export function AppSidebar() {
 			collapsible='icon'
 		>
 			{isLoggingOut && <Overlay />}
-			<SidebarHeader className='hidden lg:flex'>
+			<SidebarHeader className='hidden md:flex'>
 				<SidebarMenu>
 					<SidebarMenuItem>
 						<SidebarMenuButton
@@ -145,7 +151,12 @@ export function AppSidebar() {
 									return (
 										<SidebarMenuItem key={item.title}>
 											<SidebarMenuButton asChild>
-												<Link to={item.url}>
+												<Link
+													to={item.url}
+													aria-disabled={
+														item.title === 'Messages' && authUser?.role === 'admin'
+													}
+												>
 													{item.icon}
 													<span>{item.title}</span>
 												</Link>
@@ -157,7 +168,11 @@ export function AppSidebar() {
 									<SidebarMenuItem key={item.title}>
 										<Collapsible className='group/collapsible'>
 											<CollapsibleTrigger asChild>
-												<SidebarMenuButton disabled={authUser?.role === 'staff'}>
+												<SidebarMenuButton
+													disabled={
+														item.title === 'User Management' && authUser?.role === 'staff'
+													}
+												>
 													{item.icon}
 													<span>{item.title}</span>
 													<ChevronDown className='ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180' />

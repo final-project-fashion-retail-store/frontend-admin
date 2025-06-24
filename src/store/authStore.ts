@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import axios, { AxiosError } from 'axios';
 import { toast } from 'sonner';
+import { io, Socket } from 'socket.io-client';
 
 import type { UserType } from '@/types';
 import { setRefreshTokenFunction } from '@/utils/axios';
@@ -28,6 +29,8 @@ type Store = {
 	isResettingPassword: boolean;
 	isUpdatingProfile: boolean;
 	isChangingPassword: boolean;
+	onlineUsers: string[];
+	socket: Socket | null;
 
 	checkAuth: () => void;
 	login: (data: LoginType) => Promise<void | string>;
@@ -49,6 +52,7 @@ type Store = {
 		newPassword: string;
 		passwordConfirm: string;
 	}) => Promise<void | string>;
+	connectSocket: () => void;
 };
 
 // New refresh token service
@@ -71,7 +75,7 @@ export const refreshToken = async () => {
 	}
 };
 
-const useAuthStore = create<Store>((set) => ({
+const useAuthStore = create<Store>((set, get) => ({
 	authUser: null,
 	isCheckingAuth: true,
 	isLoggingIn: false,
@@ -80,14 +84,15 @@ const useAuthStore = create<Store>((set) => ({
 	isResettingPassword: false,
 	isUpdatingProfile: false,
 	isChangingPassword: false,
+	onlineUsers: [],
+	socket: null,
 
 	async checkAuth() {
 		try {
 			set({ isCheckingAuth: true });
 			const res = await getCurrentUser();
-			if (res) {
-				set({ authUser: res.data.user });
-			}
+			set({ authUser: res.data.user });
+			get().connectSocket();
 		} catch (err) {
 			if (err instanceof AxiosError) {
 				console.log(err?.response?.data?.message);
@@ -138,8 +143,10 @@ const useAuthStore = create<Store>((set) => ({
 	},
 
 	async refreshAccessToken() {
-		const res = await refreshToken();
-		if (!res) {
+		try {
+			await refreshToken();
+		} catch {
+			set({ authUser: null });
 			throw new Error('Failed to refresh token');
 		}
 	},
@@ -216,6 +223,73 @@ const useAuthStore = create<Store>((set) => ({
 			}
 		} finally {
 			set({ isChangingPassword: false });
+		}
+	},
+
+	connectSocket() {
+		const { authUser, socket } = get();
+
+		// Don't connect if no user or already connected
+		if (!authUser || (socket && socket.connected)) {
+			console.log('❌ Not connecting socket - no user or already connected');
+			return;
+		}
+
+		// Disconnect existing socket first
+		if (socket) {
+			console.log('🔌 Disconnecting existing socket before reconnecting');
+			socket.disconnect();
+		}
+
+		console.log('🔌 Connecting socket for user:', authUser._id);
+
+		const newSocket = io('http://localhost:4000', {
+			query: {
+				userId: authUser._id,
+			},
+			// Force new connection to avoid reusing old connections
+			forceNew: true,
+			// Reconnection settings
+			reconnection: true,
+			reconnectionDelay: 1000,
+			reconnectionAttempts: 5,
+			// Transport settings
+			transports: ['websocket', 'polling'],
+		});
+
+		// Connection event handlers
+		newSocket.on('connect', () => {
+			console.log('✅ Socket connected:', newSocket.id);
+		});
+
+		newSocket.on('disconnect', (reason) => {
+			console.log('❌ Socket disconnected:', reason);
+		});
+
+		newSocket.on('connect_error', (error) => {
+			console.error('🔌 Socket connection error:', error);
+		});
+
+		newSocket.on('getOnlineUsers', (userIds: string[]) => {
+			console.log('👥 Online users updated:', userIds);
+			set({ onlineUsers: userIds });
+		});
+
+		// Test connection
+		newSocket.emit('ping', 'test from frontend');
+		newSocket.on('pong', (data) => {
+			console.log('🏓 Pong received:', data);
+		});
+
+		set({ socket: newSocket });
+	},
+
+	disconnectSocket: () => {
+		const socket = get().socket;
+		if (socket) {
+			console.log('🔌 Manually disconnecting socket:', socket.id);
+			socket.disconnect();
+			set({ socket: null, onlineUsers: [] });
 		}
 	},
 }));

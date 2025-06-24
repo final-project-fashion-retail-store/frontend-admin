@@ -20,7 +20,7 @@ const MainLayout = () => {
 			<AppSidebar />
 			<SidebarInset className='min-w-0'>
 				<main className='flex-1 '>
-					<div className='max-lg:flex hidden w-full p-2 flex-row items-center justify-start'>
+					<div className='max-md:flex hidden w-full h-12 p-2 border-b flex-row items-center justify-start'>
 						<span className='hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex flex-row items-center justify-center rounded-md p-2 transition-colors duration-200'>
 							<div className='size-4 flex flex-row items-center justify-center'>
 								<CustomSidebarTrigger />
