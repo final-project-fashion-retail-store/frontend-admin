@@ -27,8 +27,9 @@ const initialFormValues = {
 	name: '',
 	brand: '',
 	category: '',
+	importPrice: 0,
 	price: 0,
-	salePrice: 0.0,
+	salePrice: 0,
 	shortDescription: '',
 	description: '',
 	metaTitle: '',
@@ -55,6 +56,9 @@ const formSchema = z.object({
 	}),
 	category: z.string().min(1, {
 		message: 'Category is required',
+	}),
+	importPrice: z.coerce.number().min(0, {
+		message: 'Import price must be a positive number',
 	}),
 	price: z.coerce.number().min(0, {
 		message: 'Price must be a positive number',
@@ -203,8 +207,9 @@ const ProductForm = ({ title, description, buttonTitle }: Props) => {
 				name: selectedProduct.name,
 				brand: selectedProduct.brand._id,
 				category: selectedProduct.category._id,
+				importPrice: selectedProduct.importPrice || 0,
 				price: selectedProduct.price,
-				salePrice: selectedProduct.salePrice || 0.0,
+				salePrice: selectedProduct.salePrice || 0,
 				shortDescription: selectedProduct.shortDescription || '',
 				description: selectedProduct.description || '',
 				metaTitle: selectedProduct.metaTitle || '',
@@ -257,8 +262,8 @@ const ProductForm = ({ title, description, buttonTitle }: Props) => {
 	}, [selectedProduct, slug, form]);
 
 	useEffect(() => {
-		getBrands('', '', '', '', '', 1000);
-		getSubcategories('', '', '', '', 1000);
+		getBrands('', '', '', '', '', 1000, false);
+		getSubcategories('', '', '', '', 1000, false);
 	}, [getBrands, getSubcategories]);
 
 	useEffect(() => {

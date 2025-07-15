@@ -73,7 +73,7 @@ export const getAllAddresses = async (
 	try {
 		const res = await instance.get(
 			paginationLink ||
-				`/addresses?addressManageSearch=${searchValue}&active=${active}&sort=${sort}&paginationLink=${paginationLink}&limit=5`
+				`/addresses/admin?addressManageSearch=${searchValue}&active=${active}&sort=${sort}&paginationLink=${paginationLink}&limit=5`
 		);
 		return res.data;
 	} catch (err) {
@@ -83,7 +83,7 @@ export const getAllAddresses = async (
 
 export const getAddress = async (id: string) => {
 	try {
-		const res = await instance.get(`/addresses/${id}`);
+		const res = await instance.get(`/addresses/admin/${id}`);
 		return res.data;
 	} catch (err) {
 		if (isAxiosError(err)) throw err;
@@ -92,7 +92,7 @@ export const getAddress = async (id: string) => {
 
 export const createAddress = async (data: AddressSendType) => {
 	try {
-		const res = await instance.post('/addresses', data);
+		const res = await instance.post('/addresses/admin', data);
 		return res.data;
 	} catch (err) {
 		if (isAxiosError(err)) throw err;
@@ -101,7 +101,7 @@ export const createAddress = async (data: AddressSendType) => {
 
 export const editAddress = async (id: string, data: AddressSendType) => {
 	try {
-		const res = await instance.patch(`/addresses/${id}`, data);
+		const res = await instance.patch(`/addresses/admin/${id}`, data);
 		return res.data;
 	} catch (err) {
 		if (isAxiosError(err)) throw err;
@@ -110,7 +110,7 @@ export const editAddress = async (id: string, data: AddressSendType) => {
 
 export const completelyDeleteAddress = async (id: string) => {
 	try {
-		await instance.delete(`/addresses/${id}`);
+		await instance.delete(`/addresses/admin/${id}`);
 	} catch (err) {
 		if (isAxiosError(err)) throw err;
 	}
@@ -129,7 +129,7 @@ export const completelyDeleteAddresses = async (userId: string) => {
 // Product
 export const getProduct = async (slug: string) => {
 	try {
-		const res = await instance.get(`products/${slug}`);
+		const res = await instance.get(`products/admin/${slug}`);
 		return res.data;
 	} catch (err) {
 		if (isAxiosError(err)) throw err;
@@ -149,7 +149,7 @@ export const getAllProducts = async (
 	try {
 		const res = await instance.get(
 			paginationLink ||
-				`products?productManageSearch=${searchValue}&active=${active}&inStock=${inStock}&featuredProduct=${featured}&category=${category}&brand=${brand}&sort=${sort}&limit=5`
+				`products/admin?productManageSearch=${searchValue}&active=${active}&inStock=${inStock}&featuredProduct=${featured}&category=${category}&brand=${brand}&sort=${sort}&limit=5`
 		);
 		return res.data;
 	} catch (err) {
@@ -159,7 +159,7 @@ export const getAllProducts = async (
 
 export const createProduct = async (data: ProductSendType) => {
 	try {
-		const res = await instance.post('products', data);
+		const res = await instance.post('products/admin', data);
 		return res.data;
 	} catch (err) {
 		if (isAxiosError(err)) throw err;
@@ -168,7 +168,7 @@ export const createProduct = async (data: ProductSendType) => {
 
 export const updateProduct = async (id: string, data: ProductSendType) => {
 	try {
-		const res = await instance.patch(`products/${id}`, data);
+		const res = await instance.patch(`products/admin/${id}`, data);
 		return res.data;
 	} catch (err) {
 		if (isAxiosError(err)) throw err;
@@ -177,7 +177,7 @@ export const updateProduct = async (id: string, data: ProductSendType) => {
 
 export const deleteProduct = async (id: string) => {
 	try {
-		await instance.delete(`products/${id}`);
+		await instance.delete(`products/admin/${id}`);
 	} catch (err) {
 		if (isAxiosError(err)) throw err;
 	}
@@ -194,7 +194,7 @@ export const getAllCategories = async (
 	try {
 		const res = await instance.get(
 			paginationLink ||
-				`categories?categoryManageSearch=${searchValue}&active=${active}&sort=${sort}&limit=${limit}`
+				`categories/admin?categoryManageSearch=${searchValue}&active=${active}&sort=${sort}&limit=${limit}`
 		);
 		return res.data;
 	} catch (err) {
@@ -204,7 +204,7 @@ export const getAllCategories = async (
 
 export const createCategory = async (data: CategorySendType) => {
 	try {
-		const res = await instance.post('categories', data);
+		const res = await instance.post('categories/admin', data);
 		return res.data;
 	} catch (err) {
 		if (isAxiosError(err)) throw err;
@@ -288,7 +288,7 @@ export const getAllBrands = async (
 	try {
 		const res = await instance.get(
 			paginationLink ||
-				`brands?brandManageSearch=${searchValue}&active=${active}&sort=${sort}&featuredBrand=${featured}&limit=${limit}`
+				`brands/admin?brandManageSearch=${searchValue}&active=${active}&sort=${sort}&featuredBrand=${featured}&limit=${limit}`
 		);
 		return res.data;
 	} catch (err) {
@@ -298,7 +298,7 @@ export const getAllBrands = async (
 
 export const createBrands = async (data: BrandSendType) => {
 	try {
-		const res = await instance.post('brands', data);
+		const res = await instance.post('brands/admin', data);
 		return res.data;
 	} catch (err) {
 		if (isAxiosError(err)) throw err;

@@ -88,7 +88,7 @@ const ProductManagement = () => {
 			state.pagination,
 		])
 	);
-
+	console.log(pagination);
 	const [sortConfig, setSortConfig] = useState({ field: '', direction: '' });
 	const [filterValue, setFilterValue] = useState<string>('all');
 	const [filterCategoryValue, setFilterCategoryValue] = useState<string>('all');
@@ -113,11 +113,11 @@ const ProductManagement = () => {
 	}, [getProducts]);
 
 	useEffect(() => {
-		getSubcategories('', '', '', '', 1000);
+		getSubcategories('', '', '', '', 1000, false);
 	}, [getSubcategories]);
 
 	useEffect(() => {
-		getBrands('', '', '', '', '', 1000);
+		getBrands('', '', '', '', '', 1000, false);
 	}, [getBrands]);
 
 	useEffect(() => {

@@ -44,8 +44,8 @@ const ProductVariant = ({
 	const [isUploadingImages, uploadImages] = useGeneralStore(
 		useShallow((state) => [state.isUploadingImages, state.uploadImages])
 	);
-	const selectedProduct = useProductManagementStore(
-		(state) => state.selectedProduct
+	const [selectedProduct, subcategories] = useProductManagementStore(
+		useShallow((state) => [state.selectedProduct, state.subcategories])
 	);
 	const [selectedColors, setSelectedColors] = useState<string[]>([]);
 	const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
@@ -62,7 +62,12 @@ const ProductVariant = ({
 	}, [selectedProduct, slug]);
 
 	const getSizeOptions = () => {
-		return ['Sneakers', 'Sandals'].includes(selectedCategory)
+		const footwearCategories =
+			subcategories?.filter((s) => s.parentCategory.name === 'Footwear') || [];
+
+		return footwearCategories.some(
+			(category) => category.name === selectedCategory
+		)
 			? footwearSizeOptions
 			: clothingSizeOptions;
 	};
@@ -261,6 +266,7 @@ const ProductVariant = ({
 										<Input
 											type='number'
 											step='0.01'
+											min={0}
 											value={variant.price}
 											onChange={(e) =>
 												updateVariant(
@@ -277,6 +283,7 @@ const ProductVariant = ({
 										<Input
 											type='number'
 											step='0.01'
+											min={0}
 											value={variant.salePrice || ''}
 											onChange={(e) =>
 												updateVariant(index, 'salePrice', Number.parseFloat(e.target.value))

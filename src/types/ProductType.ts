@@ -5,6 +5,7 @@ export type ProductType = {
 	name: string;
 	description: string;
 	shortDescription: string;
+	importPrice: number;
 	price: number;
 	salePrice: number;
 	category: {

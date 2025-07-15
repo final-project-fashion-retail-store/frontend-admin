@@ -110,7 +110,8 @@ type Store = {
 		active?: boolean | '',
 		sort?: string | '',
 		paginationLink?: string,
-		limit?: number
+		limit?: number,
+		setPagination?: boolean
 	) => void;
 	createSubcategory: (data: SubcategorySendType) => Promise<string | void>;
 	updateSubcategory: (
@@ -127,7 +128,8 @@ type Store = {
 		sort?: string | '',
 		featured?: boolean | '',
 		paginationLink?: string,
-		limit?: number
+		limit?: number,
+		setPagination?: boolean
 	) => void;
 	createBrand: (data: BrandSendType) => Promise<string | void>;
 	updateBrand: (id: string, data: BrandSendType) => Promise<string | void>;
@@ -214,7 +216,6 @@ const useProductManagementStore = create<Store>((set) => ({
 				sort,
 				paginationLink
 			);
-
 			set({ products: res.data.data, pagination: res.data.pagination });
 		} catch (err) {
 			if (err instanceof AxiosError) {
@@ -397,7 +398,8 @@ const useProductManagementStore = create<Store>((set) => ({
 		active = '',
 		sort = '',
 		paginationLink = '',
-		limit = 5
+		limit = 5,
+		setPagination = true
 	) {
 		try {
 			set({ isGettingSubcategory: true });
@@ -409,7 +411,11 @@ const useProductManagementStore = create<Store>((set) => ({
 				limit
 			);
 
-			set({ subcategories: res.data.data, pagination: res.data.pagination });
+			set({ subcategories: res.data.data });
+			if (setPagination) {
+				console.log('????');
+				set({ pagination: res.data.pagination });
+			}
 		} catch (err) {
 			if (err instanceof AxiosError) {
 				console.log(err);
@@ -482,7 +488,8 @@ const useProductManagementStore = create<Store>((set) => ({
 		sort = '',
 		featured = '',
 		paginationLink = '',
-		limit = 5
+		limit = 5,
+		setPagination = true
 	) {
 		try {
 			set({ isGettingBrand: true });
@@ -495,7 +502,10 @@ const useProductManagementStore = create<Store>((set) => ({
 				limit
 			);
 
-			set({ brands: res.data.data, pagination: res.data.pagination });
+			set({ brands: res.data.data });
+			if (setPagination) {
+				set({ pagination: res.data.pagination });
+			}
 		} catch (err) {
 			if (err instanceof AxiosError) {
 				console.log(err);

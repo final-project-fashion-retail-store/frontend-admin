@@ -31,6 +31,32 @@ const Pricing = ({ form }: Props) => {
 					<div className='flex-1'>
 						<FormField
 							control={form.control}
+							name='importPrice'
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>
+										Import Price <span className='text-destructive'>*</span>
+									</FormLabel>
+									<FormControl>
+										<div className='relative'>
+											<DollarSign className='absolute size-4 left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground' />
+											<Input
+												className='pl-10'
+												type='number'
+												step='0.01'
+												placeholder='0.00'
+												{...field}
+											/>
+										</div>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+					</div>
+					<div className='flex-1'>
+						<FormField
+							control={form.control}
 							name='price'
 							render={({ field }) => (
 								<FormItem>
