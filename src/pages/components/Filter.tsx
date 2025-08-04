@@ -7,6 +7,8 @@ type Props = {
 	SelectStatus?: React.ReactNode;
 	SelectBrand?: React.ReactNode;
 	SelectCategory?: React.ReactNode;
+	SelectPaymentStatus?: React.ReactNode;
+	SelectOrderStatus?: React.ReactNode;
 	formDialog?: React.ReactNode;
 };
 
@@ -17,6 +19,8 @@ const Filter = ({
 	SelectStatus,
 	SelectBrand,
 	SelectCategory,
+	SelectPaymentStatus,
+	SelectOrderStatus,
 	formDialog,
 }: Props) => {
 	return (
@@ -34,6 +38,8 @@ const Filter = ({
 					{SelectStatus && SelectStatus}
 					{SelectBrand && SelectBrand}
 					{SelectCategory && SelectCategory}
+					{SelectPaymentStatus && SelectPaymentStatus}
+					{SelectOrderStatus && SelectOrderStatus}
 					<div className='max-[1025px]:block hidden'>{formDialog}</div>
 				</div>
 			</div>

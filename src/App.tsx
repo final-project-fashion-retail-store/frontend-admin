@@ -25,6 +25,7 @@ import BrandManagement from '@/pages/BrandManagement/BrandManagement';
 import ProductManagement from '@/pages/ProductManagement/ProductManagement';
 import ProductForm from '@/pages/ProductManagement/Form/ProductFormContainer';
 import Message from '@/pages/Message/Message';
+import OrderManagement from '@/pages/OrderManagement/OrderManagement';
 
 const App = () => {
 	const [checkAuth, isCheckingAuth, authUser] = useAuthStore(
@@ -120,6 +121,10 @@ const App = () => {
 							element={<BrandManagement />}
 						/>
 						<Route />
+						<Route
+							path='orders'
+							element={<OrderManagement />}
+						/>
 						<Route
 							path='messages'
 							element={<Message />}

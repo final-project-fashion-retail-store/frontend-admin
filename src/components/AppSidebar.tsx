@@ -40,6 +40,7 @@ import {
 import { HugeiconsIcon } from '@hugeicons/react';
 import {
 	ChevronDown,
+	ClipboardList,
 	House,
 	ListTodo,
 	ListTree,
@@ -108,6 +109,11 @@ const items = [
 				icon: <Sparkles />,
 			},
 		],
+	},
+	{
+		title: 'Orders',
+		url: 'orders',
+		icon: <ClipboardList />,
 	},
 	{
 		title: 'Messages',

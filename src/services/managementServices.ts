@@ -330,3 +330,31 @@ export const getBrandStats = async () => {
 		if (isAxiosError(err)) throw err;
 	}
 };
+
+// Order
+export const getAllOrders = async (
+	searchValue?: string,
+	paymentStatus?: string,
+	orderStatus?: string,
+	sort?: string,
+	paginationLink?: string
+) => {
+	try {
+		const res = await instance.get(
+			paginationLink ||
+				`orders/admin?orderManageSearch=${searchValue}&paymentStatus=${paymentStatus}&status=${orderStatus}&sort=${sort}&limit=5`
+		);
+		return res.data;
+	} catch (err) {
+		if (isAxiosError(err)) throw err;
+	}
+};
+
+export const updateOrder = async (id: string, status: string) => {
+	try {
+		const res = await instance.patch(`orders/${id}`, { status });
+		return res.data;
+	} catch (err) {
+		if (isAxiosError(err)) throw err;
+	}
+};

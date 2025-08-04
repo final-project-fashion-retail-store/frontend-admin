@@ -280,7 +280,7 @@ const ProductManagement = () => {
 								isGettingData={isGettingProduct}
 								handleClickSortField={handleClickSortField}
 								columns={productColumns}
-								emptyMessage='There is no address'
+								emptyMessage='There is no product'
 								renderRow={(product, index) => (
 									<TableRowCustom
 										key={product._id}

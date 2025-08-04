@@ -243,7 +243,7 @@ const useAuthStore = create<Store>((set, get) => ({
 
 		console.log('🔌 Connecting socket for user:', authUser._id);
 
-		const newSocket = io('http://localhost:4000', {
+		const newSocket = io('https://api.purplebee.store', {
 			query: {
 				userId: authUser._id,
 			},

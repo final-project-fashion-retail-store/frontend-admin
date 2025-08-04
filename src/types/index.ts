@@ -21,6 +21,9 @@ export type { BrandStatType } from './BrandStatType';
 export type { MessageType } from './MessageType';
 export type { UserChatSidebarType } from './UserChatSidebarType';
 
+// Order
+export type { OrderType } from './OrderType';
+
 // Others
 export type { PaginationType } from './PaginationType';
 export type { ProvinceType } from './ProvinceType';
