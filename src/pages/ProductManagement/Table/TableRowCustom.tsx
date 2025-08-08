@@ -124,7 +124,7 @@ const TableRowCustom = ({
 						<p className='font-medium'>
 							{totalInventory - totalReservedInventory}/{totalInventory}
 						</p>
-						{data.inStock ? (
+						{data.inStock && totalInventory - totalReservedInventory > 0 ? (
 							<Badge className='bg-emerald-500 font-semibold'>In Stock</Badge>
 						) : (
 							<Badge className='bg-destructive font-semibold'>Out of Stock</Badge>

@@ -131,14 +131,13 @@ const useChatStore = create<Store>((set, get) => ({
 
 	subscribeToMessages() {
 		// console.log('📬 Subscribing to messages...');
-		const { selectedCustomer } = get();
-		if (!selectedCustomer) return;
+		if (!get().selectedCustomer) return;
 		const socket = useAuthStore.getState().socket;
 		if (!socket) return;
 
 		socket.on('newMessage', (newMessage) => {
 			const isMessageSentFromSelectedCustomer =
-				newMessage.sender === selectedCustomer._id;
+				newMessage.sender === get().selectedCustomer?._id;
 			if (!isMessageSentFromSelectedCustomer) return;
 
 			set({

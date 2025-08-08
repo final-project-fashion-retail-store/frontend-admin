@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { Route, Navigate } from 'react-router-dom';
 import { Routes } from 'react-router';
 import { Toaster } from '@/components/ui/sonner';
-import Dashboard from '@/pages/Dashboard';
+import Dashboard from '@/pages/Dashboard/Dashboard';
 import { useAuthStore } from '@/store';
 import { useShallow } from 'zustand/react/shallow';
 import { HugeiconsIcon } from '@hugeicons/react';
