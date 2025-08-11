@@ -91,6 +91,7 @@ const useAuthStore = create<Store>((set, get) => ({
 		try {
 			set({ isCheckingAuth: true });
 			const res = await getCurrentUser();
+			console.log('Current user:', res.data.user);
 			set({ authUser: res.data.user });
 			get().connectSocket();
 		} catch (err) {
