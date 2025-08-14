@@ -4,10 +4,10 @@ import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 
 // Create a base axios instance
 const instance = axios.create({
-	baseURL: process.env.VITE_BASE_URL,
+	baseURL: import.meta.env.VITE_BASE_URL,
 	headers: {
 		'Content-Type': 'application/json',
-		'x-api-key': process.env.VITE_X_API_KEY,
+		'x-api-key': import.meta.env.VITE_X_API_KEY,
 	},
 	withCredentials: true,
 });
