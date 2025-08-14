@@ -4,7 +4,8 @@ import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 
 // Create a base axios instance
 const instance = axios.create({
-	baseURL: import.meta.env.VITE_BASE_URL,
+	// baseURL: import.meta.env.VITE_BASE_URL,
+	baseURL: 'https://api.purplebee.store/api/v1/',
 	headers: {
 		'Content-Type': 'application/json',
 		'x-api-key': import.meta.env.VITE_X_API_KEY,
