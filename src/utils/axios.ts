@@ -2,13 +2,15 @@
 import axios, { AxiosError } from 'axios';
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 
+const baseURL = import.meta.env.VITE_BASE_URL;
+const apiKey = import.meta.env.VITE_X_API_KEY;
+
 // Create a base axios instance
 const instance = axios.create({
-	// baseURL: import.meta.env.VITE_BASE_URL,
-	baseURL: 'https://api.purplebee.store/api/v1/',
+	baseURL,
 	headers: {
 		'Content-Type': 'application/json',
-		'x-api-key': import.meta.env.VITE_X_API_KEY,
+		'x-api-key': apiKey,
 	},
 	withCredentials: true,
 });
