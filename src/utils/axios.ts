@@ -2,15 +2,12 @@
 import axios, { AxiosError } from 'axios';
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 
-const baseURL = import.meta.env.VITE_BASE_URL;
-const apiKey = import.meta.env.VITE_X_API_KEY;
-
 // Create a base axios instance
 const instance = axios.create({
-	baseURL,
+	baseURL: process.env.VITE_BASE_URL,
 	headers: {
 		'Content-Type': 'application/json',
-		'x-api-key': apiKey,
+		'x-api-key': process.env.VITE_X_API_KEY,
 	},
 	withCredentials: true,
 });

@@ -59,12 +59,12 @@ type Store = {
 export const refreshToken = async () => {
 	try {
 		const res = await axios.get(
-			`${import.meta.env.VITE_BASE_URL}auth/refresh-token`,
+			`${process.env.VITE_BASE_URL}auth/refresh-token`,
 			{
 				// Skip interceptor for this request to avoid loops
 				headers: {
 					skipAuthRefresh: true,
-					'x-api-key': import.meta.env.VITE_X_API_KEY,
+					'x-api-key': process.env.VITE_X_API_KEY,
 				},
 				withCredentials: true,
 			}
