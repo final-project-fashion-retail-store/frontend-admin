@@ -58,10 +58,6 @@ const DashboardTabInventory = () => {
 		}
 	};
 
-	useEffect(() => {
-		console.log('Inventory Status Updated:', inventoryStatus);
-	}, [inventoryStatus]);
-
 	return (
 		<TabsContent
 			value='inventory'

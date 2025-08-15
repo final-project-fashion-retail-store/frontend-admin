@@ -47,11 +47,6 @@ const App = () => {
 		);
 	}
 
-	console.table({
-		VITE_BASE_URL: import.meta.env.VITE_BASE_URL,
-		HAS_VITE_X_API_KEY: !!import.meta.env.VITE_X_API_KEY,
-	});
-
 	return (
 		<ThemeProvider>
 			<div className='font-display'>

@@ -110,9 +110,9 @@ const useAuthStore = create<Store>((set, get) => ({
 			const res = await login(data);
 			if (res) {
 				toast.success('Login successful');
-				// setTimeout(() => {
-				// 	window.location.href = '/';
-				// }, 2000);
+				setTimeout(() => {
+					window.location.href = '/';
+				}, 2000);
 			}
 		} catch (err) {
 			if (err instanceof AxiosError) {
