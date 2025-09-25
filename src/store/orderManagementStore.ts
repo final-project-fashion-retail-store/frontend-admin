@@ -48,7 +48,7 @@ const useOrderManagementStore = create<Stores>((set) => ({
 				sort,
 				paginationLink
 			);
-			console.log(res.data.pagination);
+
 			set({ orders: res.data.data, pagination: res.data.pagination });
 		} catch (err) {
 			console.log(err);

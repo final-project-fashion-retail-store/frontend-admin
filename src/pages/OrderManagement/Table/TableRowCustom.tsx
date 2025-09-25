@@ -60,7 +60,7 @@ const TableRowCustom = ({
 			toast.error(result.message);
 		}
 	};
-	console.log(data.user.avatar.url);
+
 	return (
 		<Fragment>
 			<TableRow>
@@ -129,12 +129,12 @@ const TableRowCustom = ({
 					<div className='flex items-start gap-1'>
 						<MapPin className='w-3 h-3 mt-0.5 flex-shrink-0' />
 						<div className='text-sm'>
-							<div className='font-medium'>{data.shippingAddress.fullName}</div>
+							<div className='font-medium'>{data?.shippingAddress?.fullName}</div>
 							<div className='text-muted-foreground/80 truncate'>
-								{data.shippingAddress.formattedAddress}
+								{data?.shippingAddress?.formattedAddress}
 							</div>
 							<div className='text-muted-foreground/60 text-xs'>
-								{data.shippingAddress.phoneNumber}
+								{data?.shippingAddress?.phoneNumber}
 							</div>
 						</div>
 					</div>
