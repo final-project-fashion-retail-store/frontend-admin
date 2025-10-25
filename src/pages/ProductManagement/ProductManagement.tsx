@@ -88,7 +88,7 @@ const ProductManagement = () => {
 			state.pagination,
 		])
 	);
-	console.log(pagination);
+
 	const [sortConfig, setSortConfig] = useState({ field: '', direction: '' });
 	const [filterValue, setFilterValue] = useState<string>('all');
 	const [filterCategoryValue, setFilterCategoryValue] = useState<string>('all');

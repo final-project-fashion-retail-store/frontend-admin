@@ -202,6 +202,13 @@ const ProductForm = ({ title, description, buttonTitle }: Props) => {
 
 	useEffect(() => {
 		if (selectedProduct && slug) {
+			// Wait for brands and categories to be loaded before populating form
+			if (
+				brandItemsRef.current.length === 0 ||
+				categoryItemsRef.current.length === 0
+			) {
+				return;
+			}
 			// Only run if there's a product and we are in edit mode (slug exists)
 			form.reset({
 				name: selectedProduct.name,
@@ -282,6 +289,51 @@ const ProductForm = ({ title, description, buttonTitle }: Props) => {
 			}));
 		}
 	}, [brands, subcategories]);
+
+	// Fix render brand and category in edit form
+	useEffect(() => {
+		let timerId: NodeJS.Timeout;
+		if (
+			selectedProduct &&
+			slug &&
+			brands &&
+			brands.length > 0 &&
+			subcategories &&
+			subcategories.length > 0
+		) {
+			timerId = setTimeout(() => {
+				form.reset({
+					name: selectedProduct.name,
+					brand: selectedProduct.brand._id,
+					category: selectedProduct.category._id,
+					importPrice: selectedProduct.importPrice || 0,
+					price: selectedProduct.price,
+					salePrice: selectedProduct.salePrice || 0,
+					shortDescription: selectedProduct.shortDescription || '',
+					description: selectedProduct.description || '',
+					metaTitle: selectedProduct.metaTitle || '',
+					metaDescription: selectedProduct.metaDescription || '',
+					inStock: selectedProduct.inStock ?? true,
+					featuredProduct: selectedProduct.featuredProduct ?? false,
+					gender: selectedProduct.gender as 'Men' | 'Women' | undefined,
+					season: selectedProduct.season as
+						| 'Spring'
+						| 'Summer'
+						| 'Fall'
+						| 'Winter'
+						| 'All Season'
+						| undefined,
+					careInstructions: selectedProduct.careInstructions || '',
+				});
+			}, 1000);
+		}
+
+		return () => {
+			if (timerId) {
+				clearTimeout(timerId);
+			}
+		};
+	}, [brands, form, selectedProduct, slug, subcategories]);
 
 	useEffect(() => {
 		if (!uploadedImages || uploadedImages.length === 0) return;
