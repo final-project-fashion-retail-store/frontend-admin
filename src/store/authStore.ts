@@ -231,18 +231,17 @@ const useAuthStore = create<Store>((set, get) => ({
 
 		// Don't connect if no user or already connected
 		if (!authUser || (socket && socket.connected)) {
-			console.log('❌ Not connecting socket - no user or already connected');
+			console.log('Not connecting socket - no user or already connected');
 			return;
 		}
 
 		// Disconnect existing socket first
 		if (socket) {
-			console.log('🔌 Disconnecting existing socket before reconnecting');
+			console.log('Disconnecting existing socket before reconnecting');
 			socket.disconnect();
 		}
 
-		console.log('🔌 Connecting socket for user:', authUser._id);
-
+		console.log('Connecting socket for user:', authUser._id);
 		const newSocket = io('https://api.purplebee.store', {
 			query: {
 				userId: authUser._id,
@@ -259,26 +258,26 @@ const useAuthStore = create<Store>((set, get) => ({
 
 		// Connection event handlers
 		newSocket.on('connect', () => {
-			console.log('✅ Socket connected:', newSocket.id);
+			console.log('Socket connected:', newSocket.id);
 		});
 
 		newSocket.on('disconnect', (reason) => {
-			console.log('❌ Socket disconnected:', reason);
+			console.log('Socket disconnected:', reason);
 		});
 
 		newSocket.on('connect_error', (error) => {
-			console.error('🔌 Socket connection error:', error);
+			console.error('Socket connection error:', error);
 		});
 
 		newSocket.on('getOnlineUsers', (userIds: string[]) => {
-			console.log('👥 Online users updated:', userIds);
+			console.log('Online users updated:', userIds);
 			set({ onlineUsers: userIds });
 		});
 
 		// Test connection
 		newSocket.emit('ping', 'test from frontend');
 		newSocket.on('pong', (data) => {
-			console.log('🏓 Pong received:', data);
+			console.log('Pong received:', data);
 		});
 
 		set({ socket: newSocket });
@@ -287,7 +286,7 @@ const useAuthStore = create<Store>((set, get) => ({
 	disconnectSocket: () => {
 		const socket = get().socket;
 		if (socket) {
-			console.log('🔌 Manually disconnecting socket:', socket.id);
+			console.log('Manually disconnecting socket:', socket.id);
 			socket.disconnect();
 			set({ socket: null, onlineUsers: [] });
 		}
