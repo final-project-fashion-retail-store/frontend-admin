@@ -20,11 +20,11 @@ const DashboardTabProduct = () => {
 	const [
 		productRevenue,
 		productRatings,
-		wishlistConversion,
+		// wishlistConversion,
 		period,
 		isGettingProductRevenue,
 		isGettingProductRatings,
-		isGettingWishlistConversion,
+		// isGettingWishlistConversion,
 		getProductRevenue,
 		getProductRatings,
 		getWishlistConversion,
@@ -32,11 +32,11 @@ const DashboardTabProduct = () => {
 		useShallow((state) => [
 			state.productRevenue,
 			state.productRatings,
-			state.wishlistConversion,
+			// state.wishlistConversion,
 			state.period,
 			state.isGettingProductRevenue,
 			state.isGettingProductRatings,
-			state.isGettingWishlistConversion,
+			// state.isGettingWishlistConversion,
 			state.getProductRevenue,
 			state.getProductRatings,
 			state.getWishlistConversion,
@@ -150,7 +150,7 @@ const DashboardTabProduct = () => {
 			</div>
 
 			{/* Wishlist Conversion */}
-			<Card>
+			{/* <Card>
 				<CardHeader>
 					<CardTitle>Wishlist to Purchase Conversion</CardTitle>
 				</CardHeader>
@@ -191,7 +191,7 @@ const DashboardTabProduct = () => {
 						</div>
 					)}
 				</CardContent>
-			</Card>
+			</Card> */}
 		</TabsContent>
 	);
 };

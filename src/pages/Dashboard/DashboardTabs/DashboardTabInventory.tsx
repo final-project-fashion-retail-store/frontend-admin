@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import {
 	Package,
 	AlertTriangle,
-	TrendingUp,
+	// TrendingUp,
 	TrendingDown,
 	Loader2,
 } from 'lucide-react';
@@ -64,7 +64,7 @@ const DashboardTabInventory = () => {
 			className='space-y-6'
 		>
 			{/* Inventory Overview */}
-			<div className='grid grid-cols-1 md:grid-cols-4 gap-6'>
+			<div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
 				<Card>
 					<CardContent className='p-6'>
 						<div className='text-center'>
@@ -87,7 +87,7 @@ const DashboardTabInventory = () => {
 						</div>
 					</CardContent>
 				</Card>
-				<Card>
+				{/* <Card>
 					<CardContent className='p-6'>
 						<div className='text-center'>
 							<TrendingUp className='w-8 h-8 mx-auto mb-2 text-green-600' />
@@ -97,7 +97,7 @@ const DashboardTabInventory = () => {
 							</p>
 						</div>
 					</CardContent>
-				</Card>
+				</Card> */}
 				<Card>
 					<CardContent className='p-6'>
 						<div className='text-center'>

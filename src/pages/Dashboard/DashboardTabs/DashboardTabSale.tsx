@@ -19,7 +19,7 @@ const DashboardTabSale = () => {
 	const [
 		categoryPerformances,
 		profitMargins,
-		eCommerceMetrics,
+		// eCommerceMetrics,
 		isGettingCategoryPerformances,
 		isGettingProfitMargins,
 		period,
@@ -30,7 +30,7 @@ const DashboardTabSale = () => {
 		useShallow((state) => [
 			state.categoryPerformances,
 			state.ProfitMargins,
-			state.eCommerceMetrics,
+			// state.eCommerceMetrics,
 			state.isGettingCategoryPerformances,
 			state.isGettingProfitMargins,
 			state.period,
@@ -133,7 +133,7 @@ const DashboardTabSale = () => {
 			</div>
 
 			{/* Sales Metrics */}
-			<div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+			{/* <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
 				<Card>
 					<CardContent className='p-6'>
 						<div className='text-center'>
@@ -164,7 +164,7 @@ const DashboardTabSale = () => {
 						</div>
 					</CardContent>
 				</Card>
-			</div>
+			</div> */}
 		</TabsContent>
 	);
 };
