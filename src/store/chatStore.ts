@@ -130,7 +130,6 @@ const useChatStore = create<Store>((set, get) => ({
 	},
 
 	subscribeToMessages() {
-		// console.log('📬 Subscribing to messages...');
 		if (!get().selectedCustomer) return;
 		const socket = useAuthStore.getState().socket;
 		if (!socket) return;
@@ -139,6 +138,11 @@ const useChatStore = create<Store>((set, get) => ({
 			const isMessageSentFromSelectedCustomer =
 				newMessage.sender === get().selectedCustomer?._id;
 			if (!isMessageSentFromSelectedCustomer) return;
+			// Check if the message already exists, temporary solution
+			const existingMessage = get().messages?.find(
+				(message) => message._id === newMessage._id
+			);
+			if (existingMessage) return;
 
 			set({
 				messages: [...(get().messages || []), newMessage],
@@ -146,7 +150,6 @@ const useChatStore = create<Store>((set, get) => ({
 		});
 
 		socket.on('sidebarReadUpdate', (customerId: string) => {
-			// console.log('📬 sidebarReadUpdate received:', customerId);
 			set({
 				customers: get().customers?.map((customer) =>
 					customer._id === customerId ? { ...customer, isRead: true } : customer
@@ -197,8 +200,6 @@ const useChatStore = create<Store>((set, get) => ({
 		}
 
 		socket.on('sidebarChatUpdate', (updatedCustomer: UserChatSidebarType) => {
-			// console.log('📬 sidebarChatUpdate received:', updatedCustomer);
-
 			const currentCustomers = get().customers || [];
 			const existingIndex = currentCustomers.findIndex(
 				(c) => c._id === updatedCustomer._id

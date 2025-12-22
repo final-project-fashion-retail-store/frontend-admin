@@ -37,10 +37,8 @@ const MessageSidebar = () => {
 	}, [getUserChatSidebar]);
 
 	useEffect(() => {
-		console.log('mounting to update user sidebar');
 		subscribeUpdateUserSidebar();
 		return () => {
-			console.log('unmounting from update user sidebar');
 			unsubscribeUpdateUserSidebar();
 		};
 	}, [subscribeUpdateUserSidebar, unsubscribeUpdateUserSidebar]);

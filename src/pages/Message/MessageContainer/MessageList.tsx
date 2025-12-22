@@ -32,14 +32,16 @@ const MessageList = () => {
 
 	useEffect(() => {
 		getMessages(selectedCustomer?._id || '');
-	}, [getMessages, selectedCustomer?._id]);
-
-	useEffect(() => {
 		subscribeToMessages();
 		return () => {
 			unsubscribeToMessages();
 		};
-	}, [subscribeToMessages, unsubscribeToMessages]);
+	}, [
+		getMessages,
+		selectedCustomer?._id,
+		subscribeToMessages,
+		unsubscribeToMessages,
+	]);
 
 	return (
 		<div className='size-full max-h-full overflow-y-auto pb-50'>
